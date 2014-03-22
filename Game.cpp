@@ -219,7 +219,6 @@ void Game::Shutdown()
 	delete mRobot;
 	mRobot = NULL;
 
-
     // delete grid
     delete mGrid;
     mGrid = NULL;
@@ -305,19 +304,6 @@ void Game::HandleEvent(const SDL_Event& e)
             break;
         }
         break;
-
-    case SDL_MOUSEBUTTONDOWN:
-        {
-            //
-            // create a new explosion
-            //
-            Explosion* boom = new Explosion(e.button.x, e.button.y);
-
-            // add it to the list
-            mExplosions.push_back(boom);
-        }
-
-        break;
     }
 }
 
@@ -337,13 +323,6 @@ void Game::Update(float dt)
 	if (mRobot)
 	{
 		mRobot->Update(dt);
-		if (mRobot->GetRect().x < 0 || mRobot->GetRect().x > mScrWidth - mRobot->GetRect().w)
-		{
-			Explosion* boom = new Explosion(mRobot->GetRect().x + mRobot->GetRect().w / 2, mRobot->GetRect().y + mRobot->GetRect().h / 2);
-            mExplosions.push_back(boom);
-			delete mRobot;
-			mRobot = NULL;
-		}
 	}
 
     //

@@ -89,7 +89,14 @@ void Robot::Update(float dt)
 		{
 			mDirection = 1;
 		}
-        mRect.x -= dt * runningSpeed;
+		if (mRect.x <= -10.0)
+		{
+			mRect.x = -10.0;
+		}
+		else
+		{
+			mRect.x -= ceil(dt * runningSpeed);
+		}
     }
     if (game->IsKeyDown(SDL_SCANCODE_D))
 	{
@@ -97,6 +104,13 @@ void Robot::Update(float dt)
 		{
 			mDirection = 0;
 		}
-        mRect.x += dt * runningSpeed;
+		if (mRect.x >= game->GetScrWidth() + 10.0 - mRect.w)
+		{
+			mRect.x = game->GetScrWidth() + 10.0 - mRect.w;
+		}
+		else
+		{
+			mRect.x += ceil(dt * runningSpeed);
+		}
     }
 }
