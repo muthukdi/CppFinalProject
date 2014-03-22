@@ -75,7 +75,8 @@ Game::Run
 void Game::Run()
 {
     // startup
-    if (!Initialize()) {
+    if (!Initialize())
+	{
         std::cerr << "*** Game initialization failed" << std::endl;
         return;
     }
@@ -86,11 +87,13 @@ void Game::Run()
     
     // main loop
     mShouldQuit = false;
-    while (!mShouldQuit) {
+    while (!mShouldQuit)
+	{
 
         // dispatch events
         SDL_Event e;
-        while (SDL_PollEvent(&e)) {
+        while (SDL_PollEvent(&e))
+		{
             HandleEvent(e);
         }
 
@@ -98,13 +101,12 @@ void Game::Run()
         Draw();
 
         // only run update if we're not paused
-        if (!mTimer.IsPaused()) {
-
+        if (!mTimer.IsPaused())
+		{
             // get time elapsed since last frame
             float now = mTimer.GetTime();
             float dt = now - mTime;
             mTime = now;
-
             // run game logic for this frame
             Update(dt);
         }
@@ -132,13 +134,15 @@ bool Game::Initialize()
     std::cout << "***" << std::endl;
 
     // initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
         std::cerr << "*** Failed to initialize SDL: " << SDL_GetError() << std::endl;
         return false;
     }
 
     // initialize SDL_image add-on
-    if (!IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG)) {
+    if (!IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG))
+	{
         std::cerr << "*** Failed to initialize SDL_image: " << IMG_GetError() << std::endl;
         return false;
     }
@@ -147,18 +151,20 @@ bool Game::Initialize()
     mScrHeight = 480;
 
     // create a window
-    mWindow = SDL_CreateWindow("Assignment 3",
+    mWindow = SDL_CreateWindow("C++ Final Project",
                                SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                mScrWidth, mScrHeight,
                                SDL_WINDOW_SHOWN /*| SDL_WINDOW_RESIZABLE*/);
-    if (!mWindow) {
+    if (!mWindow)
+	{
         std::cerr << "*** Failed to create window: " << SDL_GetError() << std::endl;
         return false;
     }
 
     // create a renderer that takes care of drawing stuff to the window
     mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!mRenderer) {
+    if (!mRenderer)
+	{
         std::cerr << "*** Failed to create renderer: " << SDL_GetError() << std::endl;
         return false;
     }
@@ -168,7 +174,8 @@ bool Game::Initialize()
 
     // create a texture manager
     mTexMgr = new GG::TextureManager;
-    if (!mTexMgr->Initialize(mRenderer, "media/")) {
+    if (!mTexMgr->Initialize(mRenderer, "media/"))
+	{
         std::cerr << "*** Failed to initialize texture manager" << std::endl;
         return false;
     }
@@ -219,7 +226,8 @@ void Game::Shutdown()
 
     // delete all explosions
     std::list<Explosion*>::iterator it = mExplosions.begin();
-    for ( ; it != mExplosions.end(); ++it) {
+    for ( ; it != mExplosions.end(); ++it)
+	{
         delete *it;
     }
     mExplosions.clear();
@@ -254,20 +262,23 @@ Game::HandleEvent
 */
 void Game::HandleEvent(const SDL_Event& e)
 {
-    switch (e.type) {
+    switch (e.type)
+	{
     case SDL_QUIT:
         mShouldQuit = true;
         break;
 
     case SDL_WINDOWEVENT:
-        if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+        if (e.window.event == SDL_WINDOWEVENT_RESIZED)
+		{
             mScrWidth = e.window.data1;
             mScrHeight = e.window.data2;
         }
         break;
 
     case SDL_KEYDOWN:
-        switch (e.key.keysym.sym) {
+        switch (e.key.keysym.sym)
+		{
         case SDLK_ESCAPE:
             mShouldQuit = true;
             break;
@@ -284,9 +295,11 @@ void Game::HandleEvent(const SDL_Event& e)
             //
             // pause or unpause
             //
-            if (mTimer.IsPaused()) {
+            if (mTimer.IsPaused())
+			{
                 mTimer.Unpause();
-            } else {
+            } else
+			{
                 mTimer.Pause();
             }
             break;
@@ -337,14 +350,18 @@ void Game::Update(float dt)
     // update the explosions
     //
     std::list<Explosion*>::iterator it = mExplosions.begin();
-    while (it != mExplosions.end()) {
+    while (it != mExplosions.end())
+	{
 
         Explosion* entity = *it;        // get a pointer to this explosion
 
-        if (entity->IsFinished()) {
+        if (entity->IsFinished())
+		{
             it = mExplosions.erase(it); // remove the entry from the list and advance iterator
             delete entity;              // delete the object
-        } else {
+        } 
+		else
+		{
             entity->Update(dt);     // update the entity
             ++it;                   // advance list iterator
         }
@@ -368,11 +385,11 @@ void Game::Draw()
 
 	if (mBackground)
 	{
-		Render(mBackground->GetRenderable(), &mBackground->GetRect());
+		Render(mBackground->GetRenderable(), &mBackground->GetRect(), SDL_FLIP_NONE);
 	}
 	if (mForeground)
 	{
-		Render(mForeground->GetRenderable(), &mForeground->GetRect());
+		Render(mForeground->GetRenderable(), &mForeground->GetRect(), SDL_FLIP_NONE);
 	}
 
     //
@@ -386,44 +403,30 @@ void Game::Draw()
         for (int x = 0; x < mGrid->NumCols(); x++)
 		{
             GG::Renderable* renderable = mGrid->GetTile(mGrid->NumRows()-1, x)->GetRenderable();
-            if (renderable) {
-                Render(renderable, &tileRect);
+            if (renderable) 
+			{
+                Render(renderable, &tileRect, SDL_FLIP_NONE);
             }
             tileRect.x += tileWidth;
         }
     }
 
+	//
+    // draw the robot
+    //
 	if (mRobot)
 	{
-		if (mRobot->GetDirection() == 1)
+		if (mRobot->GetJumping() == 1)
 		{
-			if (mRobot->GetJumping() == 1)
-			{
-				RenderFlipped(mRobot->GetRenderableJump(), &mRobot->GetRect());
-			}
-			else if (IsKeyDown(SDL_SCANCODE_A) || IsKeyDown(SDL_SCANCODE_D))
-			{
-				RenderFlipped(mRobot->GetRenderableRun(), &mRobot->GetRect());
-			}
-			else
-			{
-				RenderFlipped(mRobot->GetRenderableIdle(), &mRobot->GetRect());
-			}
+			Render(mRobot->GetRenderableJump(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
+		}
+		else if (IsKeyDown(SDL_SCANCODE_A) || IsKeyDown(SDL_SCANCODE_D))
+		{
+			Render(mRobot->GetRenderableRun(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
 		}
 		else
 		{
-			if (mRobot->GetJumping() == 1)
-			{
-				Render(mRobot->GetRenderableJump(), &mRobot->GetRect());
-			}
-			else if (IsKeyDown(SDL_SCANCODE_A) || IsKeyDown(SDL_SCANCODE_D))
-			{
-				Render(mRobot->GetRenderableRun(), &mRobot->GetRect());
-			}
-			else
-			{
-				Render(mRobot->GetRenderableIdle(), &mRobot->GetRect());
-			}
+			Render(mRobot->GetRenderableIdle(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
 		}
 	}
 
@@ -431,10 +434,10 @@ void Game::Draw()
     // draw the explosions
     //
     std::list<Explosion*>::iterator it = mExplosions.begin();
-    for ( ; it != mExplosions.end(); ++it) {
+    for ( ; it != mExplosions.end(); ++it)
+	{
         Explosion* boom = *it;
-
-        Render(boom->GetRenderable(), &boom->GetRect());
+        Render(boom->GetRenderable(), &boom->GetRect(), SDL_FLIP_NONE);
     }
 
     // display everything we just drew
@@ -461,32 +464,20 @@ Game::Render
 
 ================================================================================
 */
-void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect)
+void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL_RendererFlip flip)
 {
-    if (renderable) {
-        SDL_RenderCopy(mRenderer,
-                       renderable->GetTexture()->GetPtr(),
-                       renderable->GetRect(),
-                       dstRect);
-    } else {
-        SDL_RenderCopy(mRenderer,
-                       mTexMgr->GetDefaultTexture()->GetPtr(),
-                       NULL,
-                       dstRect);
-    }
-}
-
-void Game::RenderFlipped(const GG::Renderable* renderable, const GG::Rect* dstRect)
-{
-    if (renderable) {
+    if (renderable)
+	{
         SDL_RenderCopyEx(mRenderer, 
 					renderable->GetTexture()->GetPtr(), 
 					renderable->GetRect(), 
 					dstRect, 
 					0.0, 
 					NULL, 
-					SDL_FLIP_HORIZONTAL);
-    } else {
+					flip);
+    }
+	else
+	{
         SDL_RenderCopy(mRenderer,
                        mTexMgr->GetDefaultTexture()->GetPtr(),
                        NULL,

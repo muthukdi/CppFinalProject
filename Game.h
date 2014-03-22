@@ -92,8 +92,7 @@ private:
     void                    Draw();
 
 private:
-    void                    Render(const GG::Renderable* renderable, const GG::Rect* dstRect);
-	void                    RenderFlipped(const GG::Renderable* renderable, const GG::Rect* dstRect);
+    void					Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL_RendererFlip flip);
 };
 
 #endif
