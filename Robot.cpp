@@ -104,9 +104,9 @@ void Robot::Update(float dt)
 		{
 			mDirection = 0;
 		}
-		if (mRect.x >= game->GetScrWidth() + 10.0 - mRect.w)
+		if (mRect.x >= game->GetScrWidth() + 64.0 - mRect.w)
 		{
-			mRect.x = game->GetScrWidth() + 10.0 - mRect.w;
+			mRect.x = -10.0;
 		}
 		else
 		{
