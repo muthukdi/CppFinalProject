@@ -30,7 +30,8 @@ Game::Game()
     , mGrid(NULL)
 	, mRobot(NULL)
 	, mCoin(NULL)
-	, mScene(0)	
+	, mScene(0)
+	, rectVisible(0)
 {
 }
 
@@ -313,8 +314,20 @@ void Game::HandleEvent(const SDL_Event& e)
             }
             break;
         }
-        break;
-    }
+	case SDLK_v:
+		//
+		// pause or unpause
+		//
+		if (rectVisible)
+		{
+			rectVisible = 0;
+		}
+		else
+		{
+			rectVisible = 1;
+		}
+		break;
+	}
 }
 
 /*
@@ -440,8 +453,18 @@ void Game::Draw()
 	//
     // draw the robot
     //
+	if (rectVisible){
+		// set new color for drawing
+		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
+
+		// draw the player sprite using the selected color
+		SDL_RenderFillRect(mRenderer, &mRobot->GetRect());
+	}
+
+
 	if (mRobot)
 	{
+
 		if (mRobot->GetJumping() == 1)
 		{
 			Render(mRobot->GetRenderableJump(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
@@ -454,6 +477,14 @@ void Game::Draw()
 		{
 			Render(mRobot->GetRenderableIdle(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
 		}
+
+	}
+	if (rectVisible){
+		// set new color for drawing
+		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
+
+		// draw the player sprite using the selected color
+		SDL_RenderFillRect(mRenderer, &mCoin->GetRect());
 	}
 	if (mCoin){
 		Render(mCoin->GetRenderable(), &mCoin->GetRect(), SDL_FLIP_NONE);

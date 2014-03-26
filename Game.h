@@ -62,6 +62,8 @@ class Game {
 	Coin*					mCoin;
 	int						mScene;
 
+	bool					rectVisible;
+
 public:
     static Game*            GetInstance();
 
