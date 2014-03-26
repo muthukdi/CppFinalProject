@@ -1,10 +1,19 @@
 #include "Robot.h"
 #include "Game.h"
 
+const int Robot::GRAVITY = 2500;
+
 Robot::Robot(int x, int y)
-	: mRenderableIdle(NULL), mRenderableRun(NULL), mRenderableJump(NULL), 
-	mRect(0, 0, 0, 0), mDirection(1), mMotion(0), mJumping(0),
-	mOrigX(x), mOrigY(y)
+	: mRenderableIdle(NULL)
+	, mRenderableRun(NULL)
+	, mRenderableJump(NULL)
+	, mRect(0, 0, 0, 0)
+	, mDirection(1)
+	, mMotion(0)
+	, mJumping(0)
+	, mOrigX(x)
+	, mOrigY(y)
+	, mVelocityY(-800)
 {
 	Game* game = Game::GetInstance();
 	GG::TextureManager* texMgr = game->GetTextureManager();
@@ -35,32 +44,11 @@ void Robot::Update(float dt)
 	const float jumpingSpeed = 400;  // in pixels per second
 	Game* game = Game::GetInstance();
 	
-	if (game->IsKeyDown(SDL_SCANCODE_SPACE) || mJumping == 1)
+	if (game->IsKeyDown(SDL_SCANCODE_SPACE))
 	{
 		if (mJumping == 0)
 		{
 			mJumping = 1;
-			// Raise it a little bit off the ground
-			mRect.y -= dt;
-		}
-		mRenderableJump->Animate(dt);
-		mTimeToLiveForJump -= dt;
-		if (mTimeToLiveForJump > mRenderableJump->GetDuration()/2.0f)
-		{
-			// Going up
-			mRect.y -= dt * jumpingSpeed;
-		}
-		else
-		{
-			// Going down
-			mRect.y += dt * jumpingSpeed;
-		}
-		if (IsFinishedJumping() && mRect.y >= mOrigY)
-		{
-			mJumping = 0;
-			mRenderableJump->Rewind();
-			mTimeToLiveForJump = mRenderableJump->GetDuration();
-			mRect.y = mOrigY;
 		}
 	}
 	else if (game->IsKeyDown(SDL_SCANCODE_A) || game->IsKeyDown(SDL_SCANCODE_D))
@@ -81,6 +69,19 @@ void Robot::Update(float dt)
 			mMotion = 0;
 		}
 		mRenderableIdle->Animate(dt);
+	}
+	//This is for Gravity
+	if (mJumping == 1){		
+			mVelocityY += GRAVITY*dt;
+			mOrigY += dt * mVelocityY;
+			if (mOrigY > game->GetScrHeight()- 160){
+				mOrigY = game->GetScrHeight() - 160;
+				mJumping = 0;
+				mRenderableJump->Rewind();
+				mVelocityY = -800;
+			}
+			mRect.y = mOrigY;
+			mRenderableJump->Animate(dt);
 	}
 
     if (game->IsKeyDown(SDL_SCANCODE_A)) 

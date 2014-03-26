@@ -15,6 +15,8 @@ class Robot
 	float                   mTimeToLiveForJump;    // remaining time to live of jumping animation (in seconds)
 	int						mOrigX;
 	int						mOrigY;
+	float					mVelocityY;
+	static const int		GRAVITY;
 
 public:
 							Robot(int x, int y);

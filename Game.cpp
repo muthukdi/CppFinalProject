@@ -29,6 +29,8 @@ Game::Game()
     , mTime(0.0f)
     , mGrid(NULL)
 	, mRobot(NULL)
+	, mCoin(NULL)
+	, mScene(0)	
 {
 }
 
@@ -181,6 +183,7 @@ bool Game::Initialize()
     }
 
     // load textures
+	mTexMgr->LoadTexture("Background2", "image.png");
     mTexMgr->LoadTexture("Background", "Layer0.png");
 	mTexMgr->LoadTexture("Foreground", "Layer1.png");
     mTexMgr->LoadTexture("Tiles", "tiles.tga", 7);
@@ -193,13 +196,16 @@ bool Game::Initialize()
 	mTexMgr->LoadTexture("CrawlerWalk", "crawler_walk.png", 8);
     mTexMgr->LoadTexture("CrawlerIdle", "crawler_idle.png", 8);
 	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
+	mTexMgr->LoadTexture("Coin", "coin.png", 10);
 
     // initialize grid
     mGrid = CreateRandomLevel("Tiles");
 
+	mCoin = new Coin(mScrWidth - mScrWidth/3, mScrHeight - mScrHeight/3);
+	mRobot = new Robot(mScrWidth / 2, mScrHeight-160);
 	mBackground = new Layer(mScrWidth / 2, mScrHeight / 2, "Background");
 	mForeground = new Layer(mScrWidth / 2, mScrHeight / 2, "Foreground");
-	mRobot = new Robot(mScrWidth / 2, mScrHeight-128-32);
+	
 
     return true;
 }
@@ -235,8 +241,12 @@ void Game::Shutdown()
     delete mTexMgr;
     mTexMgr = NULL;
 
+	delete mCoin;
+	mCoin = NULL;
+
 	delete mBackground;
 	mBackground = NULL;
+
 	delete mForeground;
 	mForeground = NULL;
 
@@ -323,6 +333,25 @@ void Game::Update(float dt)
 	if (mRobot)
 	{
 		mRobot->Update(dt);
+		if (mCoin){
+			if (mRobot->GetRect().y < mCoin->GetRect().y - mCoin->GetRect().h){
+				if ((mRobot->GetRect().x + mRobot->GetRect().w / 3< mCoin->GetRect().x + mCoin->GetRect().w - mCoin->GetRect().w / 3)
+					&& (mRobot->GetRect().x + mRobot->GetRect().w - mRobot->GetRect().w / 3 >mCoin->GetRect().x + mCoin->GetRect().w / 3)){
+					delete mCoin;
+					mCoin = NULL;
+				}
+			}
+		}
+	}
+	if (mCoin)
+	{
+		mCoin->Update(dt);
+	}
+	else{
+		float minX = 32;
+		float maxX = mScrWidth - 32.0f;
+		float x = GG::RandomFloat(minX, maxX);
+		mCoin = new Coin(x, mScrHeight - mScrHeight / 3);
 	}
 
     //
@@ -361,7 +390,25 @@ void Game::Draw()
     // clear the screen
     SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mRenderer);
+	if (mRobot->GetRect().x  > mScrWidth){
+		mScene++;
+		if (mScene % 2 == 0)
+		{
+			//std::cout << mScene << " is odd  " << std::endl;
+			delete mBackground;
+			mBackground = NULL;
+			mBackground = new Layer(mScrWidth / 2, mScrHeight / 2, "Background");
+		}
+		else{
+			//std::cout << mScene << " is even  " << std::endl;
+			delete mBackground;
+			mBackground = NULL;
+			mBackground = new Layer(mScrWidth / 2, mScrHeight / 2, "Background2");
 
+		}
+		
+	}
+	
 	if (mBackground)
 	{
 		Render(mBackground->GetRenderable(), &mBackground->GetRect(), SDL_FLIP_NONE);
@@ -408,7 +455,9 @@ void Game::Draw()
 			Render(mRobot->GetRenderableIdle(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
 		}
 	}
-
+	if (mCoin){
+		Render(mCoin->GetRenderable(), &mCoin->GetRect(), SDL_FLIP_NONE);
+	}
     //
     // draw the explosions
     //

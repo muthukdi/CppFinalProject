@@ -7,6 +7,7 @@
 #include "Grid.h"
 #include "Robot.h"
 #include "Layer.h"
+#include "Coin.h"
 
 #include <list>
 
@@ -58,6 +59,8 @@ class Game {
 	Robot*					mRobot;
 	Layer*					mBackground;
 	Layer*					mForeground;
+	Coin*					mCoin;
+	int						mScene;
 
 public:
     static Game*            GetInstance();
