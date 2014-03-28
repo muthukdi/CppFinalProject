@@ -348,9 +348,9 @@ void Game::Update(float dt)
 	{
 		mRobot->Update(dt);
 		if (mCoin){
-			if (mRobot->GetRect().y < mCoin->GetRect().y - mCoin->GetRect().h){
-				if ((mRobot->GetRect().x + mRobot->GetRect().w / 4< mCoin->GetRect().x + mCoin->GetRect().w - mCoin->GetRect().w / 4)
-					&& (mRobot->GetRect().x + mRobot->GetRect().w - mRobot->GetRect().w / 4 >mCoin->GetRect().x + mCoin->GetRect().w / 4)){
+			if (mRobot->GetCollisonRect().y < mCoin->GetRect().y - mCoin->GetRect().h){
+				if ((mRobot->GetCollisonRect().x < mCoin->GetRect().x + mCoin->GetRect().w)
+					&& (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w >mCoin->GetRect().x)){
 					delete mCoin;
 					mCoin = NULL;
 				}
@@ -456,18 +456,11 @@ void Game::Draw()
     //
 	if (rectVisible){
 
-		GG::Rect *myRect = new GG::Rect(mRobot->GetRect());
-			(*myRect).x = (*myRect).x + (*myRect).w / 3;
-			(*myRect).w = (*myRect).w / 3;
-			(*myRect).y = (*myRect).y + (*myRect).h/3;
-			(*myRect).h = (*myRect).h - (*myRect).h / 3;
-
-		//myRect
 		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
 
 		// draw the player sprite using the selected color
-		SDL_RenderFillRect(mRenderer,&mRobot->GetRect());
+		SDL_RenderFillRect(mRenderer,&mRobot->GetCollisonRect());
 	}
 
 

@@ -8,6 +8,7 @@ Robot::Robot(int x, int y)
 	, mRenderableRun(NULL)
 	, mRenderableJump(NULL)
 	, mRect(0, 0, 0, 0)
+	, mCollisionRect(0,0,0,0)
 	, mDirection(1)
 	, mMotion(0)
 	, mJumping(0)
@@ -27,8 +28,15 @@ Robot::Robot(int x, int y)
 	mRect.y = y;
 	mRect.w = mRenderableIdle->GetWidth();
 	mRect.h = mRenderableIdle->GetHeight();
+
+	mCollisionRect.x = mRect.x + mRect.w / 3;
+	mCollisionRect.w = mRect.w / 2;
+	mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
+	mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+
 	// set time to live to duration of jumping animation
     mTimeToLiveForJump = mRenderableJump->GetDuration();
+
 }
 
 Robot::~Robot()
@@ -114,4 +122,17 @@ void Robot::Update(float dt)
 			mRect.x += ceil(dt * runningSpeed);
 		}
     }
+	if (mDirection == 0){
+		mCollisionRect.x = mRect.x + mRect.w / 4 -5;
+		mCollisionRect.w = mRect.w / 2;
+		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
+		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+
+	}
+	else{
+		mCollisionRect.x = mRect.x + mRect.w / 3;
+		mCollisionRect.w = mRect.w / 2;
+		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
+		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+	}
 }
