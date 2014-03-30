@@ -8,6 +8,7 @@
 #include "Robot.h"
 #include "Layer.h"
 #include "Coin.h"
+#include "Crawler.h"
 
 #include <list>
 
@@ -60,6 +61,7 @@ class Game {
 	Layer*					mBackground;
 	Layer*					mForeground;
 	Coin*					mCoin;
+	std::list<Crawler*>     mCrawlers;
 	int						mScene;
 
 	bool					rectVisible;

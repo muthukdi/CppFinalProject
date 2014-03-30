@@ -206,6 +206,18 @@ bool Game::Initialize()
 	mRobot = new Robot(mScrWidth / 2, mScrHeight-160);
 	mBackground = new Layer(mScrWidth / 2, mScrHeight / 2, "Background");
 	mForeground = new Layer(mScrWidth / 2, mScrHeight / 2, "Foreground");
+
+	// create a bunch of crawlers at random locations and random orientations
+    float minX = 32;
+    float maxX = mScrWidth - 32.0f;
+    float y = mScrHeight - 1.0f - 32.0f;
+    for (int i = 0; i < 3; i++)
+	{
+        float x = GG::RandomFloat(minX, maxX);
+        Crawler* crawler = new Crawler(x, y);
+        crawler->SetDirection(GG::RandomSign());
+        mCrawlers.push_back(crawler);
+    }
 	
 
     return true;
@@ -237,6 +249,15 @@ void Game::Shutdown()
         delete *it;
     }
     mExplosions.clear();
+
+	// delete all crawlers and clear the list
+    std::list<Crawler*>::iterator crawlerIter = mCrawlers.begin();
+    for ( ; crawlerIter != mCrawlers.end(); ++crawlerIter)
+	{
+        Crawler* crawler = *crawlerIter;
+        delete crawler;
+    }
+    mCrawlers.clear();
 
     // delete the texture manager (and all the textures it loaded for us)
     delete mTexMgr;
@@ -325,6 +346,13 @@ void Game::HandleEvent(const SDL_Event& e)
 			{
 				rectVisible = 1;
 			}
+		case SDLK_c:
+			// Add a crawler
+			float x = GG::RandomFloat(32, mScrWidth - 32.0f);
+			Crawler* crawler = new Crawler(x, mScrHeight - 1.0f - 32.0f);
+			crawler->SetDirection(GG::RandomSign());
+			mCrawlers.push_back(crawler);
+			break;
         }
 	
 		break;
@@ -343,10 +371,11 @@ Game::Update
 */
 void Game::Update(float dt)
 {
-    
+	// Update the robot
 	if (mRobot)
 	{
 		mRobot->Update(dt);
+		// Check if the robot collides with the coin
 		if (mCoin)
 		{
 			if (mRobot->GetCollisonRect().y < mCoin->GetRect().y - mCoin->GetRect().h)
@@ -360,6 +389,35 @@ void Game::Update(float dt)
 			}
 		}
 	}
+
+	// update all crawlers
+	std::list<Crawler*>::iterator crawlerIt = mCrawlers.begin();
+    while (crawlerIt != mCrawlers.end())
+	{
+		Crawler *crawler = (*crawlerIt);
+		if (crawler->GetState() == Crawler::CRAWLER_DEAD)
+		{
+			crawlerIt = mCrawlers.erase(crawlerIt); // remove the entry from the list and advance iterator
+            delete crawler;              // delete the object
+		}
+		else
+		{
+			if (mRobot->GetJumping() == 1)
+			{
+				// Check if the robot has started squashing the poor crawler
+				if (mRobot->GetCollisonRect().x > crawler->GetCollisionRect().x && 
+				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
+				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y)
+				{
+					crawler->SetState(Crawler::CRAWLER_DYING);
+				}
+			}
+			crawler->Update(dt);
+			++crawlerIt;
+		}
+    }
+
+	// Update the coin
 	if (mCoin)
 	{
 		mCoin->Update(dt);
@@ -458,18 +516,23 @@ void Game::Draw()
         }
     }
 
-	//
-    // draw the robot
-    //
+	// Draw the collision rectangles
 	if (rectVisible)
 	{
 		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
-
 		// draw the player sprite using the selected color
 		SDL_RenderFillRect(mRenderer, &mRobot->GetCollisonRect());
+		SDL_RenderFillRect(mRenderer, &mCoin->GetRect());
+		for (auto crawlerIt = mCrawlers.begin(); crawlerIt != mCrawlers.end(); ++crawlerIt)
+		{
+			Crawler* crawler = *crawlerIt;
+			SDL_RenderFillRect(mRenderer, &crawler->GetCollisionRect());
+		}
 	}
-
+	//
+    // draw the robot
+    //
 	if (mRobot)
 	{
 		// Only one of the three renderables should be run at any given time!
@@ -487,19 +550,29 @@ void Game::Draw()
 		}
 	}
 
-	if (rectVisible)
-	{
-		// set new color for drawing
-		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
-
-		// draw the player sprite using the selected color
-		SDL_RenderFillRect(mRenderer, &mCoin->GetRect());
-	}
-
+	//
+    // draw the coin
+    //
 	if (mCoin)
 	{
 		Render(mCoin->GetRenderable(), &mCoin->GetRect(), SDL_FLIP_NONE);
 	}
+
+	//
+    // draw the crawlers
+    //
+    for (auto crawlerIt = mCrawlers.begin(); crawlerIt != mCrawlers.end(); ++crawlerIt)
+	{
+        Crawler* crawler = *crawlerIt;
+		if (crawler->GetDirection() == 1)
+		{
+			Render(crawler->GetRenderable(), &crawler->GetRect(), SDL_FLIP_HORIZONTAL);
+		}
+		else
+		{
+			Render(crawler->GetRenderable(), &crawler->GetRect(), SDL_FLIP_NONE);
+		}
+    }
 
     //
     // draw the explosions
