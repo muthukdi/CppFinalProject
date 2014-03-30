@@ -21,15 +21,17 @@ class Robot
 public:
 							Robot(int x, int y);
 							~Robot();
-	const GG::Renderable*	GetRenderableIdle() const	{ return mRenderableIdle;}
-	const GG::Renderable*	GetRenderableRun() const	{ return mRenderableRun;}
-	const GG::Renderable*	GetRenderableJump() const	{ return mRenderableJump;}
-	const GG::Rect&			GetRect() const				{ return mRect; }
-	const GG::Rect&			GetCollisonRect() const		{ return mCollisionRect; }
+	const GG::Renderable*	GetRenderableIdle() const		{ return mRenderableIdle;}
+	const GG::Renderable*	GetRenderableRun() const		{ return mRenderableRun;}
+	const GG::Renderable*	GetRenderableJump() const		{ return mRenderableJump;}
+	const GG::Rect&			GetRect() const					{ return mRect; }
+	const GG::Rect&			GetCollisonRect() const			{ return mCollisionRect; }
 
-	const bool				GetDirection() const		{ return mDirection; }
-	void					SetDirection(bool d)		{ mDirection = d; }
-	const bool				GetJumping() const			{ return mJumping; }
+	const bool				GetDirection() const			{ return mDirection; }
+	void					SetDirection(bool d)			{ mDirection = d; }
+	const bool				GetJumping() const				{ return mJumping; }
+	void					Bounce(float velocity);
+	const float				GetVerticalVelocity() const		{ return mVelocityY; }
 	void					Update(float dt);
 };
 

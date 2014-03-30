@@ -346,6 +346,7 @@ void Game::HandleEvent(const SDL_Event& e)
 			{
 				rectVisible = 1;
 			}
+			break;
 		case SDLK_c:
 			// Add a crawler
 			float x = GG::RandomFloat(32, mScrWidth - 32.0f);
@@ -394,7 +395,7 @@ void Game::Update(float dt)
 	std::list<Crawler*>::iterator crawlerIt = mCrawlers.begin();
     while (crawlerIt != mCrawlers.end())
 	{
-		Crawler *crawler = (*crawlerIt);
+		Crawler *crawler = *crawlerIt;
 		if (crawler->GetState() == Crawler::CRAWLER_DEAD)
 		{
 			crawlerIt = mCrawlers.erase(crawlerIt); // remove the entry from the list and advance iterator
@@ -402,13 +403,15 @@ void Game::Update(float dt)
 		}
 		else
 		{
-			if (mRobot->GetJumping() == 1)
+			// If the robot is falling (from a jump)
+			if (mRobot->GetVerticalVelocity() > 0.0)
 			{
 				// Check if the robot has started squashing the poor crawler
-				if (mRobot->GetCollisonRect().x > crawler->GetCollisionRect().x && 
+				if (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > crawler->GetCollisionRect().x && 
 				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
-				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y)
+				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && crawler->GetState() != Crawler::CRAWLER_DYING)
 				{
+					mRobot->Bounce(-400);
 					crawler->SetState(Crawler::CRAWLER_DYING);
 				}
 			}

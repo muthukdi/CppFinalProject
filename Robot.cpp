@@ -136,3 +136,11 @@ void Robot::Update(float dt)
 		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
 	}
 }
+
+// Bounce a little after stomping on a crawler
+void Robot::Bounce(float velocity)
+{ 
+	mJumping = 1;
+	mRenderableJump->Rewind();
+	mVelocityY = velocity;
+}
