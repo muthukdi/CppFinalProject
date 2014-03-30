@@ -3,7 +3,8 @@
 
 #include "GG_Renderable.h"
 
-class Coin {
+class Coin
+{
 	GG::Renderable*         mRenderable;    // animation state
 	GG::Rect                mRect;          // screen rect
 

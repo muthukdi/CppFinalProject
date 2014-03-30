@@ -13,7 +13,6 @@ class Robot
 	bool					mDirection;  // (1 for left and 0 for right)
 	bool					mMotion; // (1 for running and 0 for idle)
 	bool					mJumping; // (1 for jumping and 0 for not jumping)
-	float                   mTimeToLiveForJump;    // remaining time to live of jumping animation (in seconds)
 	int						mOrigX;
 	int						mOrigY;
 	float					mVelocityY;
@@ -32,7 +31,6 @@ public:
 	void					SetDirection(bool d)		{ mDirection = d; }
 	const bool				GetJumping() const			{ return mJumping; }
 	void					Update(float dt);
-	bool                    IsFinishedJumping() const   { return mTimeToLiveForJump <= 0; }
 };
 
 #endif

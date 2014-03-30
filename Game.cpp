@@ -315,7 +315,7 @@ void Game::HandleEvent(const SDL_Event& e)
             break;
 		case SDLK_v:
 			//
-			// pause or unpause
+			// show/hide collision rectangle
 			//
 			if (rectVisible)
 			{
@@ -347,10 +347,13 @@ void Game::Update(float dt)
 	if (mRobot)
 	{
 		mRobot->Update(dt);
-		if (mCoin){
-			if (mRobot->GetCollisonRect().y < mCoin->GetRect().y - mCoin->GetRect().h){
+		if (mCoin)
+		{
+			if (mRobot->GetCollisonRect().y < mCoin->GetRect().y - mCoin->GetRect().h)
+			{
 				if ((mRobot->GetCollisonRect().x < mCoin->GetRect().x + mCoin->GetRect().w)
-					&& (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w >mCoin->GetRect().x)){
+					&& (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w >mCoin->GetRect().x))
+				{
 					delete mCoin;
 					mCoin = NULL;
 				}
@@ -361,7 +364,8 @@ void Game::Update(float dt)
 	{
 		mCoin->Update(dt);
 	}
-	else{
+	else
+	{
 		float minX = 32;
 		float maxX = mScrWidth - 32.0f;
 		float x = GG::RandomFloat(minX, maxX);
@@ -404,8 +408,10 @@ void Game::Draw()
     // clear the screen
     SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mRenderer);
-	if (mRobot->GetRect().x  > mScrWidth){
+	if (mRobot->GetRect().x  > mScrWidth)
+	{
 		mScene++;
+		// Change the background image when entering a new scene
 		if (mScene % 2 == 0)
 		{
 			//std::cout << mScene << " is odd  " << std::endl;
@@ -413,7 +419,8 @@ void Game::Draw()
 			mBackground = NULL;
 			mBackground = new Layer(mScrWidth / 2, mScrHeight / 2, "Background");
 		}
-		else{
+		else
+		{
 			//std::cout << mScene << " is even  " << std::endl;
 			delete mBackground;
 			mBackground = NULL;
@@ -454,19 +461,18 @@ void Game::Draw()
 	//
     // draw the robot
     //
-	if (rectVisible){
-
+	if (rectVisible)
+	{
 		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
 
 		// draw the player sprite using the selected color
-		SDL_RenderFillRect(mRenderer,&mRobot->GetCollisonRect());
+		SDL_RenderFillRect(mRenderer, &mRobot->GetCollisonRect());
 	}
-
 
 	if (mRobot)
 	{
-
+		// Only one of the three renderables should be run at any given time!
 		if (mRobot->GetJumping() == 1)
 		{
 			Render(mRobot->GetRenderableJump(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
@@ -479,18 +485,22 @@ void Game::Draw()
 		{
 			Render(mRobot->GetRenderableIdle(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
 		}
-
 	}
-	if (rectVisible){
+
+	if (rectVisible)
+	{
 		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
 
 		// draw the player sprite using the selected color
 		SDL_RenderFillRect(mRenderer, &mCoin->GetRect());
 	}
-	if (mCoin){
+
+	if (mCoin)
+	{
 		Render(mCoin->GetRenderable(), &mCoin->GetRect(), SDL_FLIP_NONE);
 	}
+
     //
     // draw the explosions
     //

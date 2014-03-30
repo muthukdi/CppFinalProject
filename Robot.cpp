@@ -34,9 +34,6 @@ Robot::Robot(int x, int y)
 	mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
 	mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
 
-	// set time to live to duration of jumping animation
-    mTimeToLiveForJump = mRenderableJump->GetDuration();
-
 }
 
 Robot::~Robot()
@@ -49,7 +46,6 @@ Robot::~Robot()
 void Robot::Update(float dt)
 {
 	const float runningSpeed = 200;  // in pixels per second
-	const float jumpingSpeed = 400;  // in pixels per second
 	Game* game = Game::GetInstance();
 	
 	if (game->IsKeyDown(SDL_SCANCODE_SPACE))
@@ -79,17 +75,20 @@ void Robot::Update(float dt)
 		mRenderableIdle->Animate(dt);
 	}
 	//This is for Gravity
-	if (mJumping == 1){		
-			mVelocityY += GRAVITY*dt;
-			mOrigY += dt * mVelocityY;
-			if (mOrigY > game->GetScrHeight()- 160){
-				mOrigY = game->GetScrHeight() - 160;
-				mJumping = 0;
-				mRenderableJump->Rewind();
-				mVelocityY = -800;
-			}
-			mRect.y = mOrigY;
-			mRenderableJump->Animate(dt);
+	if (mJumping == 1)
+	{
+		mVelocityY += GRAVITY * dt;
+		mOrigY += dt * mVelocityY;
+		// If it's below it's original height
+		if (mOrigY > game->GetScrHeight() - 160)
+		{
+			mOrigY = game->GetScrHeight() - 160;
+			mJumping = 0;
+			mRenderableJump->Rewind();
+			mVelocityY = -800;
+		}
+		mRect.y = mOrigY;
+		mRenderableJump->Animate(dt);
 	}
 
     if (game->IsKeyDown(SDL_SCANCODE_A)) 
@@ -122,14 +121,15 @@ void Robot::Update(float dt)
 			mRect.x += ceil(dt * runningSpeed);
 		}
     }
-	if (mDirection == 0){
+	if (mDirection == 0)
+	{
 		mCollisionRect.x = mRect.x + mRect.w / 4 -5;
 		mCollisionRect.w = mRect.w / 2;
 		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
 		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
-
 	}
-	else{
+	else
+	{
 		mCollisionRect.x = mRect.x + mRect.w / 3;
 		mCollisionRect.w = mRect.w / 2;
 		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
