@@ -403,17 +403,24 @@ void Game::Update(float dt)
 		}
 		else
 		{
-			// If the robot is falling (from a jump)
-			if (mRobot->GetVerticalVelocity() > 0.0)
+			// If the robot is falling from a jump
+			if (mRobot->GetVerticalVelocity() > 0.0 && mRobot->GetJumping())
 			{
 				// Check if the robot has started squashing the poor crawler
 				if (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > crawler->GetCollisionRect().x && 
 				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
 				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && crawler->GetState() != Crawler::CRAWLER_DYING)
 				{
-					mRobot->Bounce(-400);
+					mRobot->Bounce(-400, false);
 					crawler->SetState(Crawler::CRAWLER_DYING);
 				}
+			}
+			// If the robot runs into a crawler, the robot must die (but it should not be jumping at this time)
+			else if (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > crawler->GetCollisionRect().x && 
+				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
+				!mRobot->IsDead() && !mRobot->GetJumping() && crawler->GetState() != Crawler::CRAWLER_DYING)
+			{
+				mRobot->Bounce(-400, true);             // kill the robot
 			}
 			crawler->Update(dt);
 			++crawlerIt;
@@ -538,8 +545,12 @@ void Game::Draw()
     //
 	if (mRobot)
 	{
-		// Only one of the three renderables should be run at any given time!
-		if (mRobot->GetJumping() == 1)
+		// Only one of the four renderables should be run at any given time!
+		if (mRobot->IsDead() == 1)
+		{
+			Render(mRobot->GetRenderableDie(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
+		}
+		else if (mRobot->GetJumping() == 1)
 		{
 			Render(mRobot->GetRenderableJump(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
 		}

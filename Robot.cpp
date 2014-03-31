@@ -7,11 +7,13 @@ Robot::Robot(int x, int y)
 	: mRenderableIdle(NULL)
 	, mRenderableRun(NULL)
 	, mRenderableJump(NULL)
+	, mRenderableDie(NULL)
 	, mRect(0, 0, 0, 0)
 	, mCollisionRect(0,0,0,0)
 	, mDirection(1)
 	, mMotion(0)
 	, mJumping(0)
+	, mDead(0)
 	, mOrigX(x)
 	, mOrigY(y)
 	, mVelocityY(-800)
@@ -24,6 +26,8 @@ Robot::Robot(int x, int y)
 	mRenderableRun = new GG::Renderable(tex, 0.5f, true);
 	tex = texMgr->GetTexture("RobotJump");
 	mRenderableJump = new GG::Renderable(tex, 1.0f, true);
+	tex = texMgr->GetTexture("RobotDie");
+	mRenderableDie = new GG::Renderable(tex, 1.0f, false);
 	mRect.x = x;
 	mRect.y = y;
 	mRect.w = mRenderableIdle->GetWidth();
@@ -41,6 +45,7 @@ Robot::~Robot()
 	delete mRenderableIdle;
 	delete mRenderableRun;
 	delete mRenderableJump;
+	delete mRenderableDie;
 }
 
 void Robot::Update(float dt)
@@ -48,6 +53,30 @@ void Robot::Update(float dt)
 	const float runningSpeed = 200;  // in pixels per second
 	Game* game = Game::GetInstance();
 	
+	// Kill the robot with a bounce!  If the robot is dead, it's not allowed to do 
+	// anything else until it's brought back to life by using the "R" key (resurrect)
+	if (mDead == 1)
+	{
+		mMotion = 0;
+		if (game->IsKeyDown(SDL_SCANCODE_R))
+		{
+			mDead = 0;
+			mRenderableDie->Rewind();
+			mVelocityY = -800;
+			return;
+		}
+		mVelocityY += GRAVITY * dt;
+		mOrigY += dt * mVelocityY;
+		// If it's below it's original height
+		if (mOrigY > game->GetScrHeight() - 160)
+		{
+			mOrigY = game->GetScrHeight() - 160;
+			mVelocityY = 0.0;
+		}
+		mRect.y = mOrigY;
+		mRenderableDie->Animate(dt);
+		return;
+	}
 	if (game->IsKeyDown(SDL_SCANCODE_SPACE))
 	{
 		if (mJumping == 0)
@@ -74,7 +103,7 @@ void Robot::Update(float dt)
 		}
 		mRenderableIdle->Animate(dt);
 	}
-	//This is for Gravity
+	//Jumping with gravity
 	if (mJumping == 1)
 	{
 		mVelocityY += GRAVITY * dt;
@@ -137,10 +166,17 @@ void Robot::Update(float dt)
 	}
 }
 
-// Bounce a little after stomping on a crawler
-void Robot::Bounce(float velocity)
+// Bounce a little after stomping on a crawler or getting killed
+void Robot::Bounce(float velocity, bool killed)
 { 
-	mJumping = 1;
-	mRenderableJump->Rewind();
+	if (killed)
+	{
+		mDead = 1;
+	}
+	else
+	{
+		mJumping = 1;
+		mRenderableJump->Rewind();
+	}
 	mVelocityY = velocity;
 }
