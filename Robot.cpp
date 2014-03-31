@@ -58,11 +58,12 @@ void Robot::Update(float dt)
 	if (mDead == 1)
 	{
 		mMotion = 0;
-		if (game->IsKeyDown(SDL_SCANCODE_R))
+		if (game->IsKeyDown(SDL_SCANCODE_R) && mVelocityY == 0)
 		{
 			mDead = 0;
 			mRenderableDie->Rewind();
 			mVelocityY = -800;
+			mRect.y = game->GetScrHeight() - 160;
 			return;
 		}
 		mVelocityY += GRAVITY * dt;
