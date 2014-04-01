@@ -9,6 +9,7 @@
 #include "Layer.h"
 #include "Coin.h"
 #include "Crawler.h"
+#include <SDL_mixer.h>
 
 #include <list>
 
