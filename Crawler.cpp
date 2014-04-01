@@ -145,6 +145,11 @@ void Crawler::SetState(AIState newState)
         break;
     }
 
+	case CRAWLER_DEAD:
+	{
+		break;
+	}
+
     default:
         // shouldn't happen
         return;
