@@ -67,6 +67,9 @@ class Game {
 
 	bool					rectVisible;
 	Mix_Chunk*				mCoinSound;
+	Mix_Chunk*				mJumpSound;
+	Mix_Chunk*				mStompSound;
+	Mix_Chunk*				mDieSound;
 	Mix_Music*				mMusic;
 
 public:
@@ -85,6 +88,7 @@ public:
 	Robot*					GetRobot() const		    { return mRobot; }
 
     bool                    IsKeyDown(SDL_Scancode s)   { return mKeyState[s] != 0; }
+	void					PlaySound(std::string name);
 
 private:
                             Game();

@@ -33,6 +33,9 @@ Game::Game()
 	, mScene(0)
 	, rectVisible(0)
 	, mCoinSound(NULL)
+	, mJumpSound(NULL)
+	, mStompSound(NULL)
+	, mDieSound(NULL)
 	, mMusic(NULL)
 {
 }
@@ -210,7 +213,10 @@ bool Game::Initialize()
 	}
 	//loading the Coin Sound
 	mCoinSound = Mix_LoadWAV("media/coin_sound.wav");
-	if (mCoinSound == NULL)
+	mJumpSound = Mix_LoadWAV("media/jump_sound.wav");
+	mStompSound = Mix_LoadWAV("media/stomp_sound.wav");
+	mDieSound = Mix_LoadWAV("media/die_sound.wav");
+	if (mCoinSound == NULL || mJumpSound == NULL || mStompSound == NULL || mDieSound == NULL)
 	{
 		std::cerr << "*** Failed to initialize mCoinSound" << Mix_GetError()<<std::endl;
 		return false;
@@ -268,9 +274,15 @@ Game::Shutdown
 */
 void Game::Shutdown()
 {
-	//Frees the sound chunck and sets it to NULL
+	//Frees the sound chunks and sets it to NULL
 	Mix_FreeChunk(mCoinSound);
 	mCoinSound = NULL;
+	Mix_FreeChunk(mJumpSound);
+	mJumpSound = NULL;
+	Mix_FreeChunk(mStompSound);
+	mStompSound = NULL;
+	Mix_FreeChunk(mDieSound);
+	mDieSound = NULL;
 
 	//Free the music
 	Mix_FreeMusic(mMusic);
@@ -494,6 +506,7 @@ void Game::Update(float dt)
 				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
 				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && crawler->GetState() != Crawler::CRAWLER_DYING)
 				{
+					Mix_PlayChannel(-1, mStompSound, 0);
 					mRobot->Bounce(-400, false);
 					crawler->SetState(Crawler::CRAWLER_DYING);
 				}
@@ -503,6 +516,7 @@ void Game::Update(float dt)
 				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
 				!mRobot->IsDead() && !mRobot->GetJumping() && crawler->GetState() != Crawler::CRAWLER_DYING)
 			{
+				Mix_PlayChannel(-1, mDieSound, 0);
 				mRobot->Bounce(-400, true);             // kill the robot
 			}
 			crawler->Update(dt);
@@ -724,4 +738,9 @@ void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL
                        NULL,
                        dstRect);
     }
+}
+
+void Game::PlaySound(std::string name)
+{
+	Mix_PlayChannel(-1, mJumpSound, 0);
 }

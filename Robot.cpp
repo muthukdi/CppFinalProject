@@ -27,7 +27,7 @@ Robot::Robot(int x, int y)
 	tex = texMgr->GetTexture("RobotJump");
 	mRenderableJump = new GG::Renderable(tex, 1.0f, true);
 	tex = texMgr->GetTexture("RobotDie");
-	mRenderableDie = new GG::Renderable(tex, 1.0f, false);
+	mRenderableDie = new GG::Renderable(tex, 1.4f, false);
 	mRect.x = x;
 	mRect.y = y;
 	mRect.w = mRenderableIdle->GetWidth();
@@ -82,6 +82,7 @@ void Robot::Update(float dt)
 	{
 		if (mJumping == 0)
 		{
+			game->PlaySound("Dilip");
 			mJumping = 1;
 		}
 	}
