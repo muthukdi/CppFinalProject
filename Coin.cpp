@@ -6,6 +6,7 @@
 Coin::Coin(int x, int y)
 : mRenderable(NULL)
 , mRect(0, 0, 0, 0)
+, mSoundDelay(0)
 {
 	// get the texture
 	GG::Texture* tex = Game::GetInstance()->GetTextureManager()->GetTexture("Coin");

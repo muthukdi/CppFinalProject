@@ -32,6 +32,8 @@ Game::Game()
 	, mCoin(NULL)
 	, mScene(0)
 	, rectVisible(0)
+	, mCoinSound(NULL)
+	, mMusic(NULL)
 {
 }
 
@@ -132,6 +134,7 @@ Game::Initialize
 */
 bool Game::Initialize()
 {
+
     std::cout << "***" << std::endl;
     std::cout << "*** Click to make boom!" << std::endl;
     std::cout << "***" << std::endl;
@@ -142,6 +145,7 @@ bool Game::Initialize()
         std::cerr << "*** Failed to initialize SDL: " << SDL_GetError() << std::endl;
         return false;
     }
+
 
     // initialize SDL_image add-on
     if (!IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG))
@@ -183,6 +187,35 @@ bool Game::Initialize()
         return false;
     }
 
+	//Initialize SDL Audio
+	if (SDL_INIT_AUDIO < 0)
+	{
+		std::cerr << "SDL audio not initialize! SDL Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	//Initialize SDL_mixer
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+	{
+		std::cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
+		return false;
+	}
+
+	//Load musicIn
+	mMusic = Mix_LoadMUS("media/music.wav");
+	if (mMusic == NULL)
+	{
+		std::cerr << " Failed to load beat music! SDL_mixer Error:" << Mix_GetError() << std::endl;
+		return false;
+	}
+	//loading the Coin Sound
+	mCoinSound = Mix_LoadWAV("media/coin_sound.wav");
+	if (mCoinSound == NULL)
+	{
+		std::cerr << "*** Failed to initialize mCoinSound" << Mix_GetError()<<std::endl;
+		return false;
+	}
+
     // load textures
 	mTexMgr->LoadTexture("Background2", "image.png");
     mTexMgr->LoadTexture("Background", "Layer0.png");
@@ -219,7 +252,7 @@ bool Game::Initialize()
         mCrawlers.push_back(crawler);
     }
 	
-
+	Mix_PlayMusic(mMusic, -1);
     return true;
 }
 
@@ -235,6 +268,17 @@ Game::Shutdown
 */
 void Game::Shutdown()
 {
+	//Frees the sound chunck and sets it to NULL
+	Mix_FreeChunk(mCoinSound);
+	mCoinSound = NULL;
+
+	//Free the music
+	Mix_FreeMusic(mMusic);
+	mMusic = NULL;
+
+	//We also need to quit the mixer
+	Mix_Quit();
+
 	delete mRobot;
 	mRobot = NULL;
 
@@ -271,6 +315,8 @@ void Game::Shutdown()
 
 	delete mForeground;
 	mForeground = NULL;
+
+
 
     // unload the image libraries
     IMG_Quit();
@@ -346,6 +392,31 @@ void Game::HandleEvent(const SDL_Event& e)
 			{
 				rectVisible = 1;
 			}
+			break;
+		case SDLK_9:
+			//If there is no music playing
+			if (Mix_PlayingMusic() == 0)
+			{
+				//Play the music
+				Mix_PlayMusic(mMusic, -1);
+			}
+			//If music is being played
+			else
+			{
+				//If the music is paused
+				if (Mix_PausedMusic() == 1)
+				{
+					//Resume the music
+					Mix_ResumeMusic();
+				}
+				//If the music is playing
+				else
+				{
+					//Pause the music
+					Mix_PauseMusic();
+				}
+			}
+			break;
 		case SDLK_c:
 			// Add a crawler
 			float x = GG::RandomFloat(32, mScrWidth - 32.0f);
@@ -354,7 +425,6 @@ void Game::HandleEvent(const SDL_Event& e)
 			mCrawlers.push_back(crawler);
 			break;
         }
-	
 		break;
 	}
 }
@@ -378,13 +448,32 @@ void Game::Update(float dt)
 		// Check if the robot collides with the coin
 		if (mCoin)
 		{
-			if (mRobot->GetCollisonRect().y < mCoin->GetRect().y - mCoin->GetRect().h)
+			if (mRobot->GetCollisonRect().y < mCoin->GetRect().y + mCoin->GetRect().h +20)
 			{
 				if ((mRobot->GetCollisonRect().x < mCoin->GetRect().x + mCoin->GetRect().w)
 					&& (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w >mCoin->GetRect().x))
 				{
-					delete mCoin;
-					mCoin = NULL;
+						/*Mix_PlayChannel(-1, mCoinSound, 0);
+						delete mCoin;
+						mCoin = NULL;*/
+
+					//I have found that the sound is delayed...So I start it a bit earlier than the actualy delete of the Coin
+					if (mCoin->GetSoundDelay() == 0)
+					{
+						Mix_PlayChannel(-1, mCoinSound, 0);
+						mCoin->SetSoundDelay(1);
+					}
+					//Once it has run through 4 times then it Deletes the coin
+					else if (mCoin->GetSoundDelay() == 4)
+					{
+						delete mCoin;
+						mCoin = NULL;
+					}
+					//Plays the mCoinSound when the coin is captured
+					else
+					{
+						mCoin->SetSoundDelay(1);
+					}
 				}
 			}
 		}

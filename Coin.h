@@ -7,6 +7,7 @@ class Coin
 {
 	GG::Renderable*         mRenderable;    // animation state
 	GG::Rect                mRect;          // screen rect
+	int						mSoundDelay;
 
 
 public:
@@ -17,6 +18,9 @@ public:
 	const GG::Rect&         GetRect() const         { return mRect; }
 
 	void                    Update(float dt);
+
+	void					SetSoundDelay(int delayTime){ mSoundDelay += delayTime; }
+	int						GetSoundDelay(){ return mSoundDelay; }
 };
 
 #endif
