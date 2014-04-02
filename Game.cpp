@@ -642,23 +642,7 @@ void Game::Draw()
     //
 	if (mRobot)
 	{
-		// Only one of the four renderables should be run at any given time!
-		if (mRobot->IsDead() == 1)
-		{
-			Render(mRobot->GetRenderableDie(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
-		}
-		else if (mRobot->GetJumping() == 1)
-		{
-			Render(mRobot->GetRenderableJump(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
-		}
-		else if (IsKeyDown(SDL_SCANCODE_A) || IsKeyDown(SDL_SCANCODE_D))
-		{
-			Render(mRobot->GetRenderableRun(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
-		}
-		else
-		{
-			Render(mRobot->GetRenderableIdle(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
-		}
+			Render(mRobot->GetRenderable(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
 	}
 
 	//

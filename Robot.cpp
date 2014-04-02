@@ -4,14 +4,14 @@
 const int Robot::GRAVITY = 2500;
 
 Robot::Robot(int x, int y)
-	: mRenderableIdle(NULL)
+	: mRenderable(NULL)
+	, mRenderableIdle(NULL)
 	, mRenderableRun(NULL)
 	, mRenderableJump(NULL)
 	, mRenderableDie(NULL)
 	, mRect(0, 0, 0, 0)
 	, mCollisionRect(0,0,0,0)
 	, mDirection(1)
-	, mMotion(0)
 	, mJumping(0)
 	, mDead(0)
 	, mOrigX(x)
@@ -28,10 +28,12 @@ Robot::Robot(int x, int y)
 	mRenderableJump = new GG::Renderable(tex, 1.0f, true);
 	tex = texMgr->GetTexture("RobotDie");
 	mRenderableDie = new GG::Renderable(tex, 1.4f, false);
+
+	mRenderable = mRenderableIdle;
 	mRect.x = x;
 	mRect.y = y;
-	mRect.w = mRenderableIdle->GetWidth();
-	mRect.h = mRenderableIdle->GetHeight();
+	mRect.w = mRenderable->GetWidth();
+	mRect.h = mRenderable->GetHeight();
 
 	mCollisionRect.x = mRect.x + mRect.w / 3;
 	mCollisionRect.w = mRect.w / 2;
@@ -57,7 +59,10 @@ void Robot::Update(float dt)
 	// anything else until it's brought back to life by using the "R" key (resurrect)
 	if (mDead == 1)
 	{
-		mMotion = 0;
+		if (mRenderable != mRenderableDie){
+			mRenderableDie->Rewind();
+			mRenderable = mRenderableDie;
+		}
 		if (game->IsKeyDown(SDL_SCANCODE_R) && mVelocityY == 0)
 		{
 			mDead = 0;
@@ -75,7 +80,7 @@ void Robot::Update(float dt)
 			mVelocityY = 0.0;
 		}
 		mRect.y = mOrigY;
-		mRenderableDie->Animate(dt);
+		mRenderable->Animate(dt);
 		return;
 	}
 	if (game->IsKeyDown(SDL_SCANCODE_SPACE))
@@ -84,26 +89,49 @@ void Robot::Update(float dt)
 		{
 			game->PlaySound("Dilip");
 			mJumping = 1;
+			mRenderableJump->Rewind();
+			mRenderable = mRenderableJump;
 		}
 	}
 	else if (game->IsKeyDown(SDL_SCANCODE_A) || game->IsKeyDown(SDL_SCANCODE_D))
 	{
-		// If the robot is starting to run from being idle
-		if (mMotion == 0)
-		{
-			mMotion = 1;
-			mRenderableRun->Rewind();
+		//Now we check if he is jumpiing
+		if (mJumping == 1)
+		{			
+			//If not jumping anymore change the renderable
+			if (!mRenderable->IsAnimating())
+			{
+				mRenderable = mRenderableRun;
+			}
 		}
-		mRenderableRun->Animate(dt);
+		else
+		{
+			//Else, if the renderable is not Run then set it to idle
+			if (mRenderable != mRenderableRun)
+			{
+				mRenderable = mRenderableRun;
+			}
+		}
 	}
 	else
 	{
-		// If the robot stops now after running
-		if (mMotion = 1)
+		// If the robot stops now after running 
+		//Now we check if he is jumpiing
+		if (mJumping == 1)
 		{
-			mMotion = 0;
+			//If not jumping anymore change the renderable
+			if (!mRenderable->IsAnimating())
+			{
+				mRenderable = mRenderableIdle;
+			}
 		}
-		mRenderableIdle->Animate(dt);
+		//Else, if the renderable is not Idle then set it to idle
+		else{
+			if (mRenderable != mRenderableIdle)
+			{
+				mRenderable = mRenderableIdle;
+			}
+		}
 	}
 	//Jumping with gravity
 	if (mJumping == 1)
@@ -115,11 +143,11 @@ void Robot::Update(float dt)
 		{
 			mOrigY = game->GetScrHeight() - 160;
 			mJumping = 0;
-			mRenderableJump->Rewind();
 			mVelocityY = -800;
 		}
 		mRect.y = mOrigY;
-		mRenderableJump->Animate(dt);
+		
+		//mRenderable->Animate(dt);
 	}
 
     if (game->IsKeyDown(SDL_SCANCODE_A)) 
@@ -166,6 +194,8 @@ void Robot::Update(float dt)
 		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
 		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
 	}
+mRenderable->Animate(dt);
+
 }
 
 // Bounce a little after stomping on a crawler or getting killed
@@ -178,7 +208,7 @@ void Robot::Bounce(float velocity, bool killed)
 	else
 	{
 		mJumping = 1;
-		mRenderableJump->Rewind();
+		mRenderable = mRenderableJump;
 	}
 	mVelocityY = velocity;
 }
