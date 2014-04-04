@@ -238,8 +238,8 @@ bool Game::Initialize()
 	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
 	mTexMgr->LoadTexture("Coin", "coin.png", 10);
 
-    // initialize grid
-    mGrid = CreateRandomLevel("Tiles");
+    // initialize grid from a text file
+    mGrid = LoadLevel("media/0.txt");
 
 	mCoin = new Coin(mScrWidth - mScrWidth/3, mScrHeight - mScrHeight/3);
 	mRobot = new Robot(mScrWidth / 2, mScrHeight-160);
@@ -376,8 +376,8 @@ void Game::HandleEvent(const SDL_Event& e)
             //
             // repopulate the grid
             //
-            delete mGrid;
-            mGrid = CreateRandomLevel("Tiles");
+            //delete mGrid;
+            //mGrid = CreateRandomLevel("Tiles");
             break;
 
         case SDLK_p:
@@ -387,9 +387,12 @@ void Game::HandleEvent(const SDL_Event& e)
             if (mTimer.IsPaused())
 			{
                 mTimer.Unpause();
-            } else
+				Mix_PlayMusic(mMusic, -1);
+            }
+			else
 			{
                 mTimer.Pause();
+				Mix_ResumeMusic();
             }
             break;
 		case SDLK_v:
@@ -611,15 +614,20 @@ void Game::Draw()
 	{
         int tileWidth = mGrid->TileWidth();
         int tileHeight = mGrid->TileHeight();
-        GG::Rect tileRect(0, mScrHeight-tileHeight, tileWidth, tileHeight);
-        for (int x = 0; x < mGrid->NumCols(); x++)
+        GG::Rect tileRect(0, 0, tileWidth, tileHeight);
+        for (int y = 0; y < mGrid->NumRows(); y++)
 		{
-            GG::Renderable* renderable = mGrid->GetTile(mGrid->NumRows()-1, x)->GetRenderable();
-            if (renderable) 
+            for (int x = 0; x < mGrid->NumCols(); x++)
 			{
-                Render(renderable, &tileRect, SDL_FLIP_NONE);
+                const GG::Renderable* renderable = mGrid->GetTile(y, x)->GetRenderable();
+                if (renderable)
+				{
+                    Render(renderable, &tileRect, SDL_FLIP_NONE);
+                }
+                tileRect.x += tileWidth;
             }
-            tileRect.x += tileWidth;
+            tileRect.y += tileHeight;
+            tileRect.x = 0;
         }
     }
 
