@@ -1,22 +1,19 @@
 #include "Robot.h"
 #include "Game.h"
 
-const int Robot::GRAVITY = 2500;
+const float Robot::GRAVITY = 2500.0f;
 
-Robot::Robot(int x, int y)
-	: mRenderable(NULL)
+Robot::Robot(float x, float y)
+	: Entity(x, y)
 	, mRenderableIdle(NULL)
 	, mRenderableRun(NULL)
 	, mRenderableJump(NULL)
 	, mRenderableDie(NULL)
-	, mRect(0, 0, 0, 0)
 	, mCollisionRect(0,0,0,0)
 	, mDirection(1)
 	, mJumping(0)
 	, mDead(0)
-	, mOrigX(x)
-	, mOrigY(y)
-	, mVelocityY(-800)
+	, mVelocityY(-800.0f)
 {
 	Game* game = Game::GetInstance();
 	GG::TextureManager* texMgr = game->GetTextureManager();
@@ -30,10 +27,10 @@ Robot::Robot(int x, int y)
 	mRenderableDie = new GG::Renderable(tex, 1.4f, false);
 
 	mRenderable = mRenderableIdle;
-	mRect.x = x;
-	mRect.y = y;
-	mRect.w = mRenderable->GetWidth();
-	mRect.h = mRenderable->GetHeight();
+	mRect.x = (int)x;
+	mRect.y =(int) y;
+	mRect.w = (int)mRenderable->GetWidth();
+	mRect.h = (int)mRenderable->GetHeight();
 
 	mCollisionRect.x = mRect.x + mRect.w / 3;
 	mCollisionRect.w = mRect.w / 2;
@@ -72,14 +69,14 @@ void Robot::Update(float dt)
 			return;
 		}
 		mVelocityY += GRAVITY * dt;
-		mOrigY += dt * mVelocityY;
+		mPosY += dt * mVelocityY;
 		// If it's below it's original height
-		if (mOrigY > game->GetScrHeight() - 160)
+		if (mPosY > game->GetScrHeight() - 160)
 		{
-			mOrigY = game->GetScrHeight() - 160;
+			mPosY = game->GetScrHeight() - 160.0f;
 			mVelocityY = 0.0;
 		}
-		mRect.y = mOrigY;
+		mRect.y = (int)mPosY;
 		mRenderable->Animate(dt);
 		return;
 	}
@@ -136,16 +133,16 @@ void Robot::Update(float dt)
 	//Jumping with gravity
 	if (mJumping == 1)
 	{
-		mVelocityY += GRAVITY * dt;
-		mOrigY += dt * mVelocityY;
+ 		mVelocityY += GRAVITY * dt;
+		mPosY += dt * mVelocityY;
 		// If it's below it's original height
-		if (mOrigY > game->GetScrHeight() - 160)
+		if (mPosY > game->GetScrHeight() - 160.0f)
 		{
-			mOrigY = game->GetScrHeight() - 160;
+			mPosY = game->GetScrHeight() - 160.0f;
 			mJumping = 0;
-			mVelocityY = -800;
+			mVelocityY = -800.0f;
 		}
-		mRect.y = mOrigY;
+ 		mRect.y =(int) mPosY;
 		
 		//mRenderable->Animate(dt);
 	}
@@ -156,13 +153,13 @@ void Robot::Update(float dt)
 		{
 			mDirection = 1;
 		}
-		if (mRect.x <= -10.0)
+		if (mRect.x <= -10)
 		{
-			mRect.x = -10.0;
+			mRect.x = -10;
 		}
 		else
 		{
-			mRect.x -= ceil(dt * runningSpeed);
+			mRect.x -= (int)ceil(dt * runningSpeed);
 		}
     }
     if (game->IsKeyDown(SDL_SCANCODE_D))
@@ -173,11 +170,11 @@ void Robot::Update(float dt)
 		}
 		if (mRect.x >= game->GetScrWidth() + 64.0 - mRect.w)
 		{
-			mRect.x = -10.0;
+			mRect.x = -10;
 		}
 		else
 		{
-			mRect.x += ceil(dt * runningSpeed);
+			mRect.x += (int)ceil(dt * runningSpeed);
 		}
     }
 	if (mDirection == 0)

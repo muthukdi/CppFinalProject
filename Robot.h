@@ -2,29 +2,25 @@
 #define ROBOT_H_
 
 #include "GG_Renderable.h"
+#include "Entity.h"
 
-class Robot 
-{
-	GG::Renderable*         mRenderable;
+class Robot : public Entity {
+
+protected:
 	GG::Renderable*			mRenderableIdle;
 	GG::Renderable*			mRenderableRun;
 	GG::Renderable*			mRenderableJump;
 	GG::Renderable*			mRenderableDie;
-	GG::Rect				mRect;
 	GG::Rect				mCollisionRect;
 	bool					mDirection;  // (1 for left and 0 for right)
 	bool					mJumping; // (1 for jumping and 0 for not jumping)
 	bool					mDead; // (1 for dead and 0 for not dead)
-	int						mOrigX;
-	int						mOrigY;
 	float					mVelocityY;
-	static const int		GRAVITY;
+	static const float		GRAVITY;
 
 public:
-							Robot(int x, int y);
+							Robot(float x, float y);
 							~Robot();
-	GG::Renderable*         GetRenderable() const				{ return mRenderable; }
-	const GG::Rect&			GetRect() const						{ return mRect; }
 	const GG::Rect&			GetCollisonRect() const				{ return mCollisionRect; }
 
 	const bool				GetDirection() const				{ return mDirection; }

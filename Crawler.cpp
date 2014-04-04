@@ -6,10 +6,7 @@
 const float Crawler::mSpeed = 60;
 
 Crawler::Crawler(float x, float y)
-    : mRenderable(NULL)
-    , mRect()
-    , mPosX(x)
-    , mPosY(y)
+	: Entity(x, y)
     , mDirection(-1)
     , mSpeedScale(1)  // default speed
     , mIdleRenderable(NULL)

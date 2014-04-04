@@ -3,19 +3,14 @@
 
 #include "GG_Renderable.h"
 #include "GG_Common.h"
+#include "Entity.h"
 
-class Crawler {
+class Crawler : public Entity {
 
-    GG::Renderable*             mRenderable;
-    GG::Rect                    mRect;
 	GG::Rect					mCollisionRect;
-
-    float                       mPosX;
-    float                       mPosY;
-
     static const float          mSpeed;      // default speed in pixels per second
     int							mDirection;  // (-1 for left and 1 for right)
-    float                       mSpeedScale; // speed multiplier (1 is default, <1 is slower, >1 is faster)
+	float                       mSpeedScale; // speed multiplier (1 is default, <1 is slower, >1 is faster)
 	float						mTimeToDeath;    // remaining time left for death animation (in seconds)
 
 
@@ -37,8 +32,6 @@ public:
                                 Crawler(float x, float y);
                                 ~Crawler();
 
-    const GG::Renderable*       GetRenderable() const   { return mRenderable; }
-    const GG::Rect&             GetRect() const         { return mRect; }
 	const GG::Rect&				GetCollisionRect() const		{ return mCollisionRect; }
 
     float                       GetLeft() const         { return mPosX; }

@@ -5,6 +5,7 @@
 #include "GG_Timer.h"
 #include "Explosion.h"
 #include "Grid.h"
+#include "Entity.h"
 #include "Robot.h"
 #include "Layer.h"
 #include "Coin.h"

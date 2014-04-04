@@ -2,20 +2,23 @@
 #define COIN_H_
 
 #include "GG_Renderable.h"
+#include "Entity.h"
 
-class Coin
+class Coin : public Entity
 {
-	GG::Renderable*         mRenderable;    // animation state
-	GG::Rect                mRect;          // screen rect
+	//GG::Renderable*         mRenderable;    // animation state
+	//GG::Rect                mRect;          // screen rect
+	//float                   mPosX;
+	//float                   mPosY;
 	int						mSoundDelay;
 
 
 public:
-	Coin(int x, int y);
+	Coin(float x, float y);
 	~Coin();
 
-	GG::Renderable*         GetRenderable() const   { return mRenderable; }
-	const GG::Rect&         GetRect() const         { return mRect; }
+	//GG::Renderable*         GetRenderable() const   { return mRenderable; }
+	//const GG::Rect&         GetRect() const         { return mRect; }
 
 	void                    Update(float dt);
 

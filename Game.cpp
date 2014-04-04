@@ -241,10 +241,10 @@ bool Game::Initialize()
     // initialize grid
     mGrid = CreateRandomLevel("Tiles");
 
-	mCoin = new Coin(mScrWidth - mScrWidth/3, mScrHeight - mScrHeight/3);
-	mRobot = new Robot(mScrWidth / 2, mScrHeight-160);
-	mBackground = new Layer(mScrWidth / 2, mScrHeight / 2, "Background");
-	mForeground = new Layer(mScrWidth / 2, mScrHeight / 2, "Foreground");
+	mCoin = new Coin(mScrWidth - mScrWidth *.33f, mScrHeight - mScrHeight *.33f);
+	mRobot = new Robot(mScrWidth* .5f, mScrHeight-160.0f);
+	mBackground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Background");
+	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
 
 	// create a bunch of crawlers at random locations and random orientations
  /*   float minX = 32;
@@ -534,7 +534,7 @@ void Game::Update(float dt)
 		float minX = 32;
 		float maxX = mScrWidth - 32.0f;
 		float x = GG::RandomFloat(minX, maxX);
-		mCoin = new Coin(x, mScrHeight - mScrHeight / 3);
+		mCoin = new Coin(x, mScrHeight - mScrHeight *.33f);
 	}
 
     //
@@ -582,14 +582,14 @@ void Game::Draw()
 			//std::cout << mScene << " is odd  " << std::endl;
 			delete mBackground;
 			mBackground = NULL;
-			mBackground = new Layer(mScrWidth / 2, mScrHeight / 2, "Background");
+			mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background");
 		}
 		else
 		{
 			//std::cout << mScene << " is even  " << std::endl;
 			delete mBackground;
 			mBackground = NULL;
-			mBackground = new Layer(mScrWidth / 2, mScrHeight / 2, "Background2");
+			mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background2");
 
 		}
 		
