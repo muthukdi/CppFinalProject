@@ -5,11 +5,11 @@
 #include "GG_Timer.h"
 #include "Explosion.h"
 #include "Grid.h"
-#include "Entity.h"
+#include "Crawler.h"
 #include "Robot.h"
 #include "Layer.h"
 #include "Coin.h"
-#include "Crawler.h"
+#include "CrawlerWeak.h"
 #include <SDL_mixer.h>
 
 #include <list>

@@ -253,7 +253,7 @@ bool Game::Initialize()
     for (int i = 0; i < 3; i++)
 	{
         float x = GG::RandomFloat(minX, maxX);
-        Crawler* crawler = new Crawler(x, y);
+        Crawler* crawler = new CrawlerWeak(x, y);
         crawler->SetDirection(GG::RandomSign());
         mCrawlers.push_back(crawler);
     }*/
@@ -435,7 +435,7 @@ void Game::HandleEvent(const SDL_Event& e)
 		case SDLK_c:
 			// Add a crawler
 			float x = GG::RandomFloat(32, mScrWidth - 32.0f);
-			Crawler* crawler = new Crawler(x, mScrHeight - 1.0f - 32.0f);
+			Crawler* crawler = new CrawlerWeak(x, mScrHeight - 1.0f - 32.0f);
 			crawler->SetDirection(GG::RandomSign());
 			mCrawlers.push_back(crawler);
 			break;
@@ -493,7 +493,7 @@ void Game::Update(float dt)
 	std::list<Crawler*>::iterator crawlerIt = mCrawlers.begin();
     while (crawlerIt != mCrawlers.end())
 	{
-		Crawler *crawler = *crawlerIt;
+		Crawler *crawler =   *crawlerIt;
 		if (crawler->GetState() == Crawler::CRAWLER_DEAD)
 		{
 			crawlerIt = mCrawlers.erase(crawlerIt); // remove the entry from the list and advance iterator
@@ -507,7 +507,7 @@ void Game::Update(float dt)
 				// Check if the robot has started squashing the poor crawler
 				if (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > crawler->GetCollisionRect().x && 
 				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
-				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && crawler->GetState() != Crawler::CRAWLER_DYING)
+				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
 				{
 					Mix_PlayChannel(-1, mStompSound, 0);
 					mRobot->Bounce(-400, false);
@@ -517,7 +517,7 @@ void Game::Update(float dt)
 			// If the robot runs into a crawler, the robot must die (but it should not be jumping at this time)
 			else if (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > crawler->GetCollisionRect().x && 
 				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
-				!mRobot->IsDead() && !mRobot->GetJumping() && crawler->GetState() != Crawler::CRAWLER_DYING)
+				!mRobot->IsDead() && !mRobot->GetJumping() && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
 			{
 				Mix_PlayChannel(-1, mDieSound, 0);
 				mRobot->Bounce(-400, true);             // kill the robot

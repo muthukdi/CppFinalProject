@@ -2,11 +2,13 @@
 #define ROBOT_H_
 
 #include "GG_Renderable.h"
-#include "Entity.h"
 
-class Robot : public Entity {
+class Robot{
 
-protected:
+	GG::Renderable*         mRenderable;
+	GG::Rect				mRect;
+	float                   mPosX;
+	float                   mPosY;
 	GG::Renderable*			mRenderableIdle;
 	GG::Renderable*			mRenderableRun;
 	GG::Renderable*			mRenderableJump;
@@ -21,6 +23,8 @@ protected:
 public:
 							Robot(float x, float y);
 							~Robot();
+	GG::Renderable*         GetRenderable() const		{ return mRenderable; }
+	const GG::Rect&			GetRect() const				{ return mRect; }
 	const GG::Rect&			GetCollisonRect() const				{ return mCollisionRect; }
 
 	const bool				GetDirection() const				{ return mDirection; }

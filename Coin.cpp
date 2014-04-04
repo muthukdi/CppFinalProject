@@ -4,7 +4,10 @@
 #include <iostream>
 
 Coin::Coin(float x, float y)
-: Entity(x, y)
+: mRenderable(NULL)
+, mRect(0,0,0,0)
+, mPosX(x)
+, mPosY(y)
 , mSoundDelay(0)
 {
 	// get the texture

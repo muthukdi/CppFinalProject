@@ -2,14 +2,13 @@
 #define COIN_H_
 
 #include "GG_Renderable.h"
-#include "Entity.h"
 
-class Coin : public Entity
+class Coin
 {
-	//GG::Renderable*         mRenderable;    // animation state
-	//GG::Rect                mRect;          // screen rect
-	//float                   mPosX;
-	//float                   mPosY;
+	GG::Renderable*         mRenderable;    // animation state
+	GG::Rect                mRect;          // screen rect
+	float                   mPosX;
+	float                   mPosY;
 	int						mSoundDelay;
 
 
@@ -17,8 +16,8 @@ public:
 	Coin(float x, float y);
 	~Coin();
 
-	//GG::Renderable*         GetRenderable() const   { return mRenderable; }
-	//const GG::Rect&         GetRect() const         { return mRect; }
+	GG::Renderable*         GetRenderable() const   { return mRenderable; }
+	const GG::Rect&         GetRect() const         { return mRect; }
 
 	void                    Update(float dt);
 
