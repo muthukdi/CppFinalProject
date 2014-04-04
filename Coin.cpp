@@ -3,9 +3,8 @@
 
 #include <iostream>
 
-Coin::Coin(int x, int y)
-: mRenderable(NULL)
-, mRect(0, 0, 0, 0)
+Coin::Coin(float x, float y)
+: Entity(x, y)
 , mSoundDelay(0)
 {
 	// get the texture
@@ -15,8 +14,8 @@ Coin::Coin(int x, int y)
 	mRenderable = new GG::Renderable(tex, .75f, true);
 
 	// center the screen rect at the specified coordinates
-	mRect.x = x - mRenderable->GetWidth() / 2;
-	mRect.y = y - mRenderable->GetHeight() / 2;
+	mRect.x = (int)x - mRenderable->GetWidth() / 2;
+	mRect.y = (int)y - mRenderable->GetHeight() / 2;
 	mRect.w = mRenderable->GetWidth();
 	mRect.h = mRenderable->GetHeight();
 
