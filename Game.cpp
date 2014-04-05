@@ -235,6 +235,8 @@ bool Game::Initialize()
 	mTexMgr->LoadTexture("Meteor", "meteor.png");
 	mTexMgr->LoadTexture("CrawlerWalk", "crawler_walk.png", 8);
     mTexMgr->LoadTexture("CrawlerIdle", "crawler_idle.png", 8);
+	mTexMgr->LoadTexture("CrawlerWalkPink", "crawler_walk_pink.png", 8);
+	mTexMgr->LoadTexture("CrawlerIdlePink", "crawler_idle_pink.png", 8);
 	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
 	mTexMgr->LoadTexture("Coin", "coin.png", 10);
 
@@ -242,21 +244,31 @@ bool Game::Initialize()
     mGrid = LoadLevel("media/0.txt");
 
 	mCoin = new Coin(mScrWidth - mScrWidth *.33f, mScrHeight - mScrHeight *.33f);
-	mRobot = new Robot(mScrWidth* .5f, mScrHeight-160.0f);
+	mRobot = new Robot(50.0f, mScrHeight-160.0f);
 	mBackground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Background");
 	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
 
 	// create a bunch of crawlers at random locations and random orientations
- /*   float minX = 32;
+    float minX = 150.0f;
     float maxX = mScrWidth - 32.0f;
     float y = mScrHeight - 1.0f - 32.0f;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++)
 	{
-        float x = GG::RandomFloat(minX, maxX);
-        Crawler* crawler = new CrawlerWeak(x, y);
-        crawler->SetDirection(GG::RandomSign());
-        mCrawlers.push_back(crawler);
-    }*/
+		if (i % 2){
+			float x = GG::RandomFloat(minX, maxX);
+			Crawler* crawler = new CrawlerWeak(x, y, true);
+			crawler->SetDirection(GG::RandomSign());
+			mCrawlers.push_back(crawler);
+		}
+		else{
+			float x = GG::RandomFloat(minX, maxX);
+			Crawler* crawler = new CrawlerStrong(x, y, false);
+			crawler->SetDirection(GG::RandomSign());
+			mCrawlers.push_back(crawler);
+		}
+      
+    }
+
 	
 	Mix_PlayMusic(mMusic, -1);
     return true;
@@ -432,13 +444,23 @@ void Game::HandleEvent(const SDL_Event& e)
 				}
 			}
 			break;
-		case SDLK_c:
-			// Add a crawler
-			float x = GG::RandomFloat(32, mScrWidth - 32.0f);
-			Crawler* crawler = new CrawlerWeak(x, mScrHeight - 1.0f - 32.0f);
-			crawler->SetDirection(GG::RandomSign());
-			mCrawlers.push_back(crawler);
-			break;
+		case SDLK_x:{
+					// Add a crawler
+					float x = GG::RandomFloat(32, mScrWidth - 32.0f);
+					Crawler* crawler = new CrawlerStrong(x, mScrHeight - 1.0f - 32.0f, false);
+					crawler->SetDirection(GG::RandomSign());
+					mCrawlers.push_back(crawler);
+					break;		
+					}
+
+		case SDLK_c:{
+					// Add a crawler
+					float x = GG::RandomFloat(32, mScrWidth - 32.0f);
+					Crawler* crawler = new CrawlerWeak(x, mScrHeight - 1.0f - 32.0f, true);
+					crawler->SetDirection(GG::RandomSign());
+					mCrawlers.push_back(crawler);
+					break;
+					}
         }
 		break;
 	}
@@ -509,9 +531,16 @@ void Game::Update(float dt)
 				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
 				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
 				{
-					Mix_PlayChannel(-1, mStompSound, 0);
-					mRobot->Bounce(-400, false);
-					crawler->SetState(Crawler::CRAWLER_DYING);
+					if (crawler->IsJumpedOn()){
+						Mix_PlayChannel(-1, mStompSound, 0);
+						mRobot->Bounce(-400, false);
+						crawler->SetState(Crawler::CRAWLER_DYING);
+					}
+					else{
+						mRobot->Bounce(-400, false);
+						crawler->SetState(Crawler::CRAWLER_DYING);
+					}
+					
 				}
 			}
 			// If the robot runs into a crawler, the robot must die (but it should not be jumping at this time)

@@ -9,6 +9,7 @@
 #include "Robot.h"
 #include "Layer.h"
 #include "Coin.h"
+#include "CrawlerStrong.h"
 #include "CrawlerWeak.h"
 #include <SDL_mixer.h>
 

@@ -32,9 +32,12 @@ class Crawler {
 
 		void                        SetRenderable(GG::Renderable* renderable);      // private helper method
 
+		bool						mJumpedOn;
+
+
 
 	public:
-		Crawler(float x, float y);
+		Crawler(float x, float y, bool jumpedOn);
 		virtual ~Crawler();
 
 		const GG::Renderable*       GetRenderable() const   { return mRenderable; }
@@ -61,6 +64,7 @@ class Crawler {
 		void                        SetSpeedScale(float s)  { mSpeedScale = s; }
 
 		void                        SetState(AIState newState);
+		const bool					IsJumpedOn() const			{ return mJumpedOn; }
 
 		virtual void                Update(float dt) = 0; //Virtual method used with the CrawlerWeak and strong
 	};

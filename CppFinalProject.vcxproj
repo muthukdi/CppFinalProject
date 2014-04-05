@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Coin.cpp" />
+    <ClCompile Include="CrawlerStrong.cpp" />
     <ClCompile Include="CrawlerWeak.cpp" />
     <ClCompile Include="Robot.cpp" />
     <ClCompile Include="Crawler.cpp" />
@@ -96,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Coin.h" />
+    <ClInclude Include="CrawlerStrong.h" />
     <ClInclude Include="CrawlerWeak.h" />
     <ClInclude Include="Crawler.h" />
     <ClInclude Include="Robot.h" />

@@ -8,7 +8,7 @@
 class CrawlerWeak : public Crawler {
 
 public:
-	CrawlerWeak(float x, float y);
+	CrawlerWeak(float x, float y, bool jumpedOn);
 	CrawlerWeak::~CrawlerWeak(){}
 
 	void                        Update(float dt) override;

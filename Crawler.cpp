@@ -5,7 +5,7 @@
 
 const float Crawler::mSpeed = 60;
 
-Crawler::Crawler(float x, float y)
+Crawler::Crawler(float x, float y, bool jumpedOn)
 : mRenderable(NULL)
 , mRect()
 , mPosX(x)
@@ -18,6 +18,7 @@ Crawler::Crawler(float x, float y)
 , mState(CRAWLER_INIT)
 , mCollisionRect(0, 0, 0, 0)
 , mNextThinkTime(0)
+, mJumpedOn(jumpedOn)
 {
 }
 
