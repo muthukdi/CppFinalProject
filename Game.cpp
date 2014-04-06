@@ -35,6 +35,7 @@ Game::Game()
 	, mCoinSound(NULL)
 	, mJumpSound(NULL)
 	, mStompSound(NULL)
+	, mStompSoundNoKill(NULL)
 	, mDieSound(NULL)
 	, mMusic(NULL)
 {
@@ -215,8 +216,9 @@ bool Game::Initialize()
 	mCoinSound = Mix_LoadWAV("media/coin_sound.wav");
 	mJumpSound = Mix_LoadWAV("media/jump_sound.wav");
 	mStompSound = Mix_LoadWAV("media/stomp_sound.wav");
+	mStompSoundNoKill = Mix_LoadWAV("media/stomp_sound_nokill.wav");
 	mDieSound = Mix_LoadWAV("media/die_sound.wav");
-	if (mCoinSound == NULL || mJumpSound == NULL || mStompSound == NULL || mDieSound == NULL)
+	if (mCoinSound == NULL || mJumpSound == NULL || mStompSound == NULL || mDieSound == NULL || mStompSoundNoKill == NULL)
 	{
 		std::cerr << "*** Failed to initialize mCoinSound" << Mix_GetError()<<std::endl;
 		return false;
@@ -254,13 +256,15 @@ bool Game::Initialize()
     float y = mScrHeight - 1.0f - 32.0f;
     for (int i = 0; i < 4; i++)
 	{
-		if (i % 2){
+		if (i % 2)
+		{
 			float x = GG::RandomFloat(minX, maxX);
 			Crawler* crawler = new CrawlerWeak(x, y, true);
 			crawler->SetDirection(GG::RandomSign());
 			mCrawlers.push_back(crawler);
 		}
-		else{
+		else
+		{
 			float x = GG::RandomFloat(minX, maxX);
 			Crawler* crawler = new CrawlerStrong(x, y, false);
 			crawler->SetDirection(GG::RandomSign());
@@ -269,7 +273,6 @@ bool Game::Initialize()
       
     }
 
-	
 	Mix_PlayMusic(mMusic, -1);
     return true;
 }
@@ -531,12 +534,15 @@ void Game::Update(float dt)
 				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
 				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
 				{
-					if (crawler->IsJumpedOn()){
+					if (crawler->IsJumpedOn())
+					{
 						Mix_PlayChannel(-1, mStompSound, 0);
 						mRobot->Bounce(-400, false);
 						crawler->SetState(Crawler::CRAWLER_DYING);
 					}
-					else{
+					else
+					{
+						Mix_PlayChannel(-1, mStompSoundNoKill, 0);
 						mRobot->Bounce(-400, false);
 						crawler->SetState(Crawler::CRAWLER_DYING);
 					}

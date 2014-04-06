@@ -71,6 +71,7 @@ class Game {
 	Mix_Chunk*				mCoinSound;
 	Mix_Chunk*				mJumpSound;
 	Mix_Chunk*				mStompSound;
+	Mix_Chunk*				mStompSoundNoKill;
 	Mix_Chunk*				mDieSound;
 	Mix_Music*				mMusic;
 

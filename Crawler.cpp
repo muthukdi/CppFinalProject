@@ -86,35 +86,35 @@ void Crawler::SetState(AIState newState)
 	case CRAWLER_IDLE:
 	{
 
-						 mIdleRenderable->Rewind();
-						 SetRenderable(mIdleRenderable);
+		mIdleRenderable->Rewind();
+		SetRenderable(mIdleRenderable);
 
-						 int numCycles = GG::RandomIntInclusive(2, 5);
-						 mNextThinkTime = game->GetTime() + numCycles * mIdleRenderable->GetDuration();
+		int numCycles = GG::RandomIntInclusive(2, 5);
+		mNextThinkTime = game->GetTime() + numCycles * mIdleRenderable->GetDuration();
 
-						 break;
+		break;
 	}
 
 	case CRAWLER_WALK:
 	{
-						 mWalkRenderable->Rewind();
-						 SetRenderable(mWalkRenderable);
+		mWalkRenderable->Rewind();
+		SetRenderable(mWalkRenderable);
 
-						 SetSpeedScale(GG::RandomFloat(0.5f, 2.0f));
+		SetSpeedScale(GG::RandomFloat(0.5f, 2.0f));
 
-						 int numCycles = GG::RandomIntInclusive(5, 10);
-						 mNextThinkTime = game->GetTime() + numCycles * mWalkRenderable->GetDuration();
+		int numCycles = GG::RandomIntInclusive(5, 10);
+		mNextThinkTime = game->GetTime() + numCycles * mWalkRenderable->GetDuration();
 
-						 break;
+		break;
 	}
 
 	case CRAWLER_DYING:
 	{
 
-						  mIdleRenderable->Rewind();
-						  SetRenderable(mDieRenderable);
+		mIdleRenderable->Rewind();
+		SetRenderable(mDieRenderable);
 
-						  break;
+		break;
 	}
 
 	default:

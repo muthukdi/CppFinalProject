@@ -53,9 +53,6 @@ CrawlerStrong::~CrawlerStrong()
 
 void CrawlerStrong::Update(float dt)
 {
-
-
-
 	Game* game = Game::GetInstance();
 
 	switch (mState)
