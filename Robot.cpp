@@ -14,12 +14,13 @@ Robot::Robot(float x, float y)
 	, mRenderableJump(NULL)
 	, mRenderableDie(NULL)
 	, mCollisionRect(0,0,0,0)
-	, mTileRect(0,0,0,0)
+	, mBottomTileRect(0,0,0,0)
+	, mTopTileRect(0,0,0,0)
 	, mDirection(0)
 	, mJumping(0)
 	, mFalling(0)
 	, mDead(0)
-	, mVelocityY(-800.0f)
+	, mVelocityY(-850.0f)
 {
 	Game* game = Game::GetInstance();
 	GG::TextureManager* texMgr = game->GetTextureManager();
@@ -55,17 +56,24 @@ void Robot::Update(float dt)
 	const float runningSpeed = 200;  // in pixels per second
 	Game* game = Game::GetInstance();
 
-	// Get the tile that's directly beneath the robot's feet
+	// Get the tiles that're directly above and beneath the robot's feet
 	int tileWidth = game->GetGrid()->TileWidth();
     int tileHeight = game->GetGrid()->TileHeight();
-	mTileRect.w = tileWidth;
-	mTileRect.h = tileHeight;
+	mBottomTileRect.w = mTopTileRect.w = tileWidth;
+	mBottomTileRect.h = mTopTileRect.h = tileHeight;
+	// Get the bottom tile
 	int row = (mCollisionRect.y + mCollisionRect.h)/tileHeight;
 	int column = (mCollisionRect.x + mCollisionRect.w/2)/tileWidth;
-	GG::Renderable *tileRenderable = game->GetGrid()->GetTile(row, column)->GetRenderable();
-	mTileRect.x = column*tileWidth;
-	mTileRect.y = row*tileHeight;
-	
+	GG::Renderable *bottomTileRenderable = game->GetGrid()->GetTile(row, column)->GetRenderable();
+	mBottomTileRect.x = column*tileWidth;
+	mBottomTileRect.y = row*tileHeight;
+	// Get the top tile
+	row = (mCollisionRect.y)/tileHeight;
+	column = (mCollisionRect.x + mCollisionRect.w/2)/tileWidth;
+	GG::Renderable *topTileRenderable = game->GetGrid()->GetTile(row, column)->GetRenderable();
+	mTopTileRect.x = column*tileWidth;
+	mTopTileRect.y = row*tileHeight;
+
 	// Kill the robot with a bounce!  If the robot is dead, it's not allowed to do 
 	// anything else until it's brought back to life by using the "R" key (resurrect)
 	if (mDead == 1)
@@ -78,19 +86,19 @@ void Robot::Update(float dt)
 		{
 			mDead = 0;
 			mRenderableDie->Rewind();
-			mVelocityY = -800.0f;
-			mRect.y = mTileRect.y - mRect.h;
+			mVelocityY = -850.0f;
+			mRect.y = mBottomTileRect.y - mRect.h;
 			return;
 		}
 		mVelocityY += GRAVITY * dt;
 		mRect.y += (int)(dt * mVelocityY);
 		// If there is a tile directly beneath the robot's body
 		// AND it's on its way down, stop the fall.
-		if (tileRenderable && mVelocityY > 0.0f)
+		if (bottomTileRenderable && mVelocityY > 0.0f)
 		{
-			if (mCollisionRect.y + mCollisionRect.h > mTileRect.y)
+			if (mCollisionRect.y + mCollisionRect.h > mBottomTileRect.y)
 			{
-				mRect.y = mTileRect.y - mRect.h;
+				mRect.y = mBottomTileRect.y - mRect.h;
 				mVelocityY = 0.0f;
 			}
 		}
@@ -106,21 +114,21 @@ void Robot::Update(float dt)
 		mRect.y += (int)(dt * mVelocityY);
 		// If there is a tile directly beneath the robot's feet
 		// AND it's on its way down, stop the fall
-		if (tileRenderable && mVelocityY > 0.0f)
+		if (bottomTileRenderable && mVelocityY > 0.0f)
 		{
-			if (mCollisionRect.y + mCollisionRect.h > mTileRect.y)
+			if (mCollisionRect.y + mCollisionRect.h > mBottomTileRect.y)
 			{
-				mRect.y = mTileRect.y - mRect.h;
+				mRect.y = mBottomTileRect.y - mRect.h;
 				mFalling = 0;
-				mVelocityY = -800.0f;
+				mVelocityY = -850.0f;
 			}
 		}
 	}
 	else if (game->IsKeyDown(SDL_SCANCODE_SPACE))
 	{
-		if (mJumping == 0)
+		if (mJumping == 0 )
 		{
-			game->PlaySound("Dilip");
+			game->PlaySound("Jump");
 			mJumping = 1;
 			mRenderableJump->Rewind();
 			mRenderable = mRenderableJump;
@@ -174,13 +182,24 @@ void Robot::Update(float dt)
 		mRect.y += (int)(dt * mVelocityY);
 		// If there is a tile directly beneath the robot's feet
 		// AND it's on it's way down
-		if (tileRenderable && mVelocityY > 0.0f)
+		if (bottomTileRenderable && mVelocityY > 0.0f)
 		{
-			if (mCollisionRect.y + mCollisionRect.h > mTileRect.y)
+			if (mCollisionRect.y + mCollisionRect.h > mBottomTileRect.y)
 			{
-				mRect.y = mTileRect.y - mRect.h;
+				mRect.y = mBottomTileRect.y - mRect.h;
 				mJumping = 0;
-				mVelocityY = -800.0f;
+				mVelocityY = -850.0f;
+			}
+		}
+		// If there is a tile directly above the robot's head
+		// AND it's on it's way up
+		if (topTileRenderable && mVelocityY <= 0.0f)
+		{
+			if (mCollisionRect.y < mTopTileRect.y + mTopTileRect.h)
+			{
+				game->StopSounds();
+				game->PlaySound("Block");
+				mVelocityY = -mVelocityY;
 			}
 		}
 	}
@@ -220,7 +239,7 @@ void Robot::Update(float dt)
 	
 	// If there is no ground beneath you, then start falling
 	// but not if you are already either jumping or falling!
-	if (!tileRenderable && !mJumping && !mFalling)
+	if (!bottomTileRenderable && !mJumping && !mFalling)
 	{
 		mFalling = 1;
 		mVelocityY = 0.0f;

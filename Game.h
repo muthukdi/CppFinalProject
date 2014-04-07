@@ -73,6 +73,7 @@ class Game {
 	Mix_Chunk*				mStompSound;
 	Mix_Chunk*				mStompSoundNoKill;
 	Mix_Chunk*				mDieSound;
+	Mix_Chunk*				mBlockSound;
 	Mix_Music*				mMusic;
 
 public:
@@ -92,6 +93,7 @@ public:
 
     bool                    IsKeyDown(SDL_Scancode s)   { return mKeyState[s] != 0; }
 	void					PlaySound(std::string name);
+	void					Game::StopSounds();
 	std::list<Crawler*>*	GetCrawlers()				{ return &mCrawlers; }
 	std::list<Coin*>*		GetCoins()					{ return &mCoins; }
 

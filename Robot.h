@@ -16,7 +16,8 @@ protected:
 	GG::Renderable*			mRenderableDie;
 
 	GG::Rect				mCollisionRect;
-	GG::Rect				mTileRect; // the tile that's directly beneath the robot
+	GG::Rect				mBottomTileRect; // the tile that's directly above the robot
+	GG::Rect				mTopTileRect; // the tile that's directly beneath the robot
 	bool					mDirection;  // (1 for left and 0 for right)
 	bool					mJumping; // (1 for jumping and 0 for not jumping)
 	bool					mFalling; // (1 for falling and 0 for not falling)
@@ -30,7 +31,8 @@ public:
 	GG::Renderable*         GetRenderable() const				{ return mRenderable; }
 	const GG::Rect&			GetRect() const						{ return mRect; }
 	const GG::Rect&			GetCollisonRect() const				{ return mCollisionRect; }
-	const GG::Rect&			GetTileRect() const				{ return mTileRect; }
+	const GG::Rect&			GetBottomTileRect() const			{ return mBottomTileRect; }
+	const GG::Rect&			GetTopTileRect() const			{ return mTopTileRect; }
 
 	const bool				GetDirection() const				{ return mDirection; }
 	const bool				GetJumping() const					{ return mJumping; }

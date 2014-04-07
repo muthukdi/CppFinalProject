@@ -36,6 +36,7 @@ Game::Game()
 	, mStompSound(NULL)
 	, mStompSoundNoKill(NULL)
 	, mDieSound(NULL)
+	, mBlockSound(NULL)
 	, mMusic(NULL)
 {
 }
@@ -217,7 +218,8 @@ bool Game::Initialize()
 	mStompSound = Mix_LoadWAV("media/stomp_sound.wav");
 	mStompSoundNoKill = Mix_LoadWAV("media/stomp_sound_nokill.wav");
 	mDieSound = Mix_LoadWAV("media/die_sound.wav");
-	if (mCoinSound == NULL || mJumpSound == NULL || mStompSound == NULL || mDieSound == NULL || mStompSoundNoKill == NULL)
+	mBlockSound = Mix_LoadWAV("media/block_sound.wav");
+	if (mCoinSound == NULL || mJumpSound == NULL || mStompSound == NULL || mDieSound == NULL || mStompSoundNoKill == NULL || mBlockSound == NULL)
 	{
 		std::cerr << "*** Failed to initialize mCoinSound" << Mix_GetError()<<std::endl;
 		return false;
@@ -560,7 +562,7 @@ void Game::Update(float dt)
 				if (mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && 
 				mRobot->GetCollisonRect().y < crawler->GetCollisionRect().y + crawler->GetCollisionRect().h)
 				{
-					if (!mRobot->IsDead() && mRobot->GetVerticalVelocity() == -800.0f && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
+					if (!mRobot->IsDead() && mRobot->GetVerticalVelocity() == -850.0f && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
 					{
 						Mix_PlayChannel(-1, mDieSound, 0);
 						mRobot->Bounce(-400, true);             // kill the robot
@@ -668,7 +670,10 @@ void Game::Draw()
 	{
 		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
-		SDL_RenderFillRect(mRenderer, &mRobot->GetTileRect());
+		SDL_RenderFillRect(mRenderer, &mRobot->GetBottomTileRect());
+		// set new color for drawing
+		SDL_SetRenderDrawColor(mRenderer, 150, 0, 0, 255);
+		SDL_RenderFillRect(mRenderer, &mRobot->GetTopTileRect());
 		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
 		// draw the player sprite using the selected color
@@ -782,5 +787,17 @@ void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL
 
 void Game::PlaySound(std::string name)
 {
-	Mix_PlayChannel(-1, mJumpSound, 0);
+	if (name == "Jump")
+	{
+		Mix_PlayChannel(-1, mJumpSound, 0);
+	}
+	else if (name == "Block")
+	{
+		Mix_PlayChannel(-1, mBlockSound, 0);
+	}
+}
+
+void Game::StopSounds()
+{
+	Mix_HaltChannel(-1);
 }
