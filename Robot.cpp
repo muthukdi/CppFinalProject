@@ -228,6 +228,9 @@ void Robot::Update(float dt)
 		if (mRect.x >= game->GetScrWidth() + 64.0 - mRect.w)
 		{
 			mRect.x = -10;
+			int *scene = game->GetScene();
+			(*scene)++;
+			game->LoadScene(*scene);
 		}
 		else
 		{

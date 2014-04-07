@@ -90,12 +90,14 @@ public:
 
     Grid*                   GetGrid() const             { return mGrid; }
 	Robot*					GetRobot() const		    { return mRobot; }
+	int*					GetScene()					{ return &mScene; }
 
     bool                    IsKeyDown(SDL_Scancode s)   { return mKeyState[s] != 0; }
 	void					PlaySound(std::string name);
 	void					Game::StopSounds();
 	std::list<Crawler*>*	GetCrawlers()				{ return &mCrawlers; }
 	std::list<Coin*>*		GetCoins()					{ return &mCoins; }
+	void					LoadScene(int scene);
 
 private:
                             Game();

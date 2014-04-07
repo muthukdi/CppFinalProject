@@ -226,9 +226,10 @@ bool Game::Initialize()
 	}
 
     // load textures
-	mTexMgr->LoadTexture("Background2", "image.png");
-    mTexMgr->LoadTexture("Background", "Layer0.png");
-	mTexMgr->LoadTexture("Foreground", "Layer1.png");
+	mTexMgr->LoadTexture("Background2", "Layer2.png");
+    mTexMgr->LoadTexture("Background", "Layer1.png");
+	mTexMgr->LoadTexture("Background3", "Layer3.png");
+	mTexMgr->LoadTexture("Foreground", "Layer0.png");
     mTexMgr->LoadTexture("Tiles", "tiles.tga", 7);
     mTexMgr->LoadTexture("Explosion", "explosion.tga", 16);
 	mTexMgr->LoadTexture("RobotIdle", "robot_idle.png", 8);
@@ -610,27 +611,6 @@ void Game::Draw()
     // clear the screen
     SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mRenderer);
-	if (mRobot->GetRect().x  > mScrWidth)
-	{
-		mScene++;
-		// Change the background image when entering a new scene
-		if (mScene % 2 == 0)
-		{
-			//std::cout << mScene << " is odd  " << std::endl;
-			delete mBackground;
-			mBackground = NULL;
-			mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background");
-		}
-		else
-		{
-			//std::cout << mScene << " is even  " << std::endl;
-			delete mBackground;
-			mBackground = NULL;
-			mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background2");
-
-		}
-		
-	}
 	
 	if (mBackground)
 	{
@@ -638,7 +618,7 @@ void Game::Draw()
 	}
 	if (mForeground)
 	{
-		Render(mForeground->GetRenderable(), &mForeground->GetRect(), SDL_FLIP_NONE);
+		//Render(mForeground->GetRenderable(), &mForeground->GetRect(), SDL_FLIP_NONE);
 	}
 
     //
@@ -701,7 +681,7 @@ void Game::Draw()
     //
 	if (mRobot)
 	{
-			Render(mRobot->GetRenderable(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
+		Render(mRobot->GetRenderable(), &mRobot->GetRect(), mRobot->GetDirection()?SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
 	}
 
 	//
@@ -800,4 +780,47 @@ void Game::PlaySound(std::string name)
 void Game::StopSounds()
 {
 	Mix_HaltChannel(-1);
+}
+
+void Game::LoadScene(int scene)
+{
+	// delete all crawlers and clear the list
+    std::list<Crawler*>::iterator crawlerIter = mCrawlers.begin();
+    for ( ; crawlerIter != mCrawlers.end(); ++crawlerIter)
+	{
+        Crawler* crawler = *crawlerIter;
+        delete crawler;
+    }
+    mCrawlers.clear();
+
+	// delete all coins and clear the list
+    std::list<Coin*>::iterator coinIter = mCoins.begin();
+    for ( ; coinIter != mCoins.end(); ++coinIter)
+	{
+        Coin* coin = *coinIter;
+        delete coin;
+    }
+    mCoins.clear();
+
+	delete mBackground;
+	mBackground = NULL;
+
+	delete mGrid;
+	mGrid = NULL;
+
+	if (mScene % 3 == 0)
+	{
+		mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background");
+		mGrid = LoadLevel("media/0.txt");
+	}
+	else if (mScene % 3 == 1)
+	{
+		mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background2");
+		mGrid = LoadLevel("media/1.txt");
+	}
+	else
+	{
+		mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background3");
+		mGrid = LoadLevel("media/2.txt");
+	}
 }
