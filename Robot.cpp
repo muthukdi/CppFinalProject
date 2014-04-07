@@ -38,10 +38,7 @@ Robot::Robot(float x, float y)
 	mRect.w = (int)mRenderable->GetWidth();
 	mRect.h = (int)mRenderable->GetHeight();
 
-	mCollisionRect.x = mRect.x + mRect.w / 3;
-	mCollisionRect.w = mRect.w / 2;
-	mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
-	mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+	SetCollisionRect();
 
 }
 
@@ -88,31 +85,17 @@ void Robot::Update(float dt)
 		mVelocityY += GRAVITY * dt;
 		mRect.y += (int)(dt * mVelocityY);
 		// If there is a tile directly beneath the robot's body
-		// AND it's on its way down
+		// AND it's on its way down, stop the fall.
 		if (tileRenderable && mVelocityY > 0.0f)
 		{
 			if (mCollisionRect.y + mCollisionRect.h > mTileRect.y)
 			{
 				mRect.y = mTileRect.y - mRect.h;
-				printf("\n%i", mRect.y + mRect.h);
 				mVelocityY = 0.0f;
 			}
 		}
-		// Set the collision rectangle
-		if (mDirection == 0)
-		{
-			mCollisionRect.x = mRect.x + mRect.w / 4 -5;
-			mCollisionRect.w = mRect.w / 2;
-			mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
-			mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
-		}
-		else
-		{
-			mCollisionRect.x = mRect.x + mRect.w / 3;
-			mCollisionRect.w = mRect.w / 2;
-			mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
-			mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
-		}
+		SetCollisionRect();
+		
 		mRenderable->Animate(dt);
 		return;
 	}
@@ -122,13 +105,12 @@ void Robot::Update(float dt)
 		mVelocityY += GRAVITY * dt;
 		mRect.y += (int)(dt * mVelocityY);
 		// If there is a tile directly beneath the robot's feet
-		// AND it's on its way down
+		// AND it's on its way down, stop the fall
 		if (tileRenderable && mVelocityY > 0.0f)
 		{
 			if (mCollisionRect.y + mCollisionRect.h > mTileRect.y)
 			{
 				mRect.y = mTileRect.y - mRect.h;
-				printf("\n%i", mRect.y + mRect.h);
 				mFalling = 0;
 				mVelocityY = -800.0f;
 			}
@@ -234,21 +216,7 @@ void Robot::Update(float dt)
 		}
     }
 
-	// Set the collision rectangle
-	if (mDirection == 0)
-	{
-		mCollisionRect.x = mRect.x + mRect.w / 4 -5;
-		mCollisionRect.w = mRect.w / 2;
-		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
-		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
-	}
-	else
-	{
-		mCollisionRect.x = mRect.x + mRect.w / 3;
-		mCollisionRect.w = mRect.w / 2;
-		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
-		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
-	}
+	SetCollisionRect();
 	
 	// If there is no ground beneath you, then start falling
 	// but not if you are already either jumping or falling!
@@ -276,4 +244,22 @@ void Robot::Bounce(float velocity, bool killed)
 		mRenderable = mRenderableJump;
 	}
 	mVelocityY = velocity;
+}
+
+void Robot::SetCollisionRect()
+{
+	if (mDirection == 0)
+	{
+		mCollisionRect.x = mRect.x + mRect.w / 4 -5;
+		mCollisionRect.w = mRect.w / 2;
+		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
+		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+	}
+	else
+	{
+		mCollisionRect.x = mRect.x + mRect.w / 3;
+		mCollisionRect.w = mRect.w / 2;
+		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
+		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+	}
 }

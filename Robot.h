@@ -35,6 +35,7 @@ public:
 	const bool				GetDirection() const				{ return mDirection; }
 	const bool				GetJumping() const					{ return mJumping; }
 	const bool				GetFalling() const					{ return mFalling; }
+	void					SetCollisionRect();
 	const bool				IsDead() const						{ return mDead; }
 	void					KillRobot()							{ mDead = 1; }
 	void					Bounce(float velocity, bool killed);
