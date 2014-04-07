@@ -44,6 +44,25 @@ void CrawlerWeak::Update(float dt)
 {
 	Game* game = Game::GetInstance();
 
+	// Get the next tile that the crawler is going to walk on
+	int tileWidth = game->GetGrid()->TileWidth();
+    int tileHeight = game->GetGrid()->TileHeight();
+	mTileRect.w = tileWidth;
+	mTileRect.h = tileHeight;
+	int row = (mCollisionRect.y + mCollisionRect.h + 10)/tileHeight;
+	int column;
+	if (mDirection == -1)
+	{
+		column = (mCollisionRect.x + mCollisionRect.w/8)/tileWidth;
+	}
+	else
+	{
+		column = (mCollisionRect.x + mCollisionRect.w/2)/tileWidth;
+	}
+	GG::Renderable *tileRenderable = game->GetGrid()->GetTile(row, column)->GetRenderable();
+	mTileRect.x = column*tileWidth;
+	mTileRect.y = row*tileHeight;
+
 	switch (mState)
 	{
 	case CRAWLER_WALK:
@@ -57,20 +76,18 @@ void CrawlerWeak::Update(float dt)
 			 // advance animation
 			 mRenderable->Animate(dt * mSpeedScale);
 
-			 // move position 
-			 mPosX += dt * mSpeed * mSpeedScale * mDirection;
 
-			// deal with screen edge collisions
-			int scrWidth = Game::GetInstance()->GetScrWidth();
-			if (GetLeft() < 0)
+			// deal with edges of the crawler's platform
+			if (!tileRenderable)
 			{
-				SetLeft(0);
+				// revert to previous position 
+				mPosX -= dt * mSpeed * mSpeedScale * mDirection;
 				Reverse();
 			}
-			else if (GetRight() >= scrWidth)
+			else
 			{
-				SetRight((float)(scrWidth - 1));
-				Reverse();
+				// move position 
+				 mPosX += dt * mSpeed * mSpeedScale * mDirection;
 			}
 
 			// update the on-screen rect position (x is the only coordinate that changes)

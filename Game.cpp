@@ -29,7 +29,6 @@ Game::Game()
     , mTime(0.0f)
     , mGrid(NULL)
 	, mRobot(NULL)
-	, mCoin(NULL)
 	, mScene(0)
 	, rectVisible(0)
 	, mCoinSound(NULL)
@@ -242,37 +241,15 @@ bool Game::Initialize()
 	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
 	mTexMgr->LoadTexture("Coin", "coin.png", 10);
 
-    // initialize grid from a text file
+    // initialize grid from a text file (including crawlers and coins!)
     mGrid = LoadLevel("media/0.txt");
 
-	mCoin = new Coin(mScrWidth - mScrWidth *.33f, mScrHeight - mScrHeight *.33f);
-	mRobot = new Robot(50.0f, mScrHeight-160.0f);
+	// initialize the robot
+	mRobot = new Robot(350.0f, mScrHeight-160.0f-32.0f);
 	mBackground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Background");
 	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
 
-	// create a bunch of crawlers at random locations and random orientations
-    float minX = 150.0f;
-    float maxX = mScrWidth - 32.0f;
-    float y = mScrHeight - 1.0f - 32.0f;
-    for (int i = 0; i < 4; i++)
-	{
-		if (i % 2)
-		{
-			float x = GG::RandomFloat(minX, maxX);
-			Crawler* crawler = new CrawlerWeak(x, y, true);
-			crawler->SetDirection(GG::RandomSign());
-			mCrawlers.push_back(crawler);
-		}
-		else
-		{
-			float x = GG::RandomFloat(minX, maxX);
-			Crawler* crawler = new CrawlerStrong(x, y, false);
-			crawler->SetDirection(GG::RandomSign());
-			mCrawlers.push_back(crawler);
-		}
-      
-    }
-
+	// Play the background music
 	Mix_PlayMusic(mMusic, -1);
     return true;
 }
@@ -330,12 +307,18 @@ void Game::Shutdown()
     }
     mCrawlers.clear();
 
+	// delete all coins and clear the list
+    std::list<Coin*>::iterator coinIter = mCoins.begin();
+    for ( ; coinIter != mCoins.end(); ++coinIter)
+	{
+        Coin* coin = *coinIter;
+        delete coin;
+    }
+    mCoins.clear();
+
     // delete the texture manager (and all the textures it loaded for us)
     delete mTexMgr;
     mTexMgr = NULL;
-
-	delete mCoin;
-	mCoin = NULL;
 
 	delete mBackground;
 	mBackground = NULL;
@@ -447,23 +430,25 @@ void Game::HandleEvent(const SDL_Event& e)
 				}
 			}
 			break;
-		case SDLK_x:{
-					// Add a crawler
-					float x = GG::RandomFloat(32, mScrWidth - 32.0f);
-					Crawler* crawler = new CrawlerStrong(x, mScrHeight - 1.0f - 32.0f, false);
-					crawler->SetDirection(GG::RandomSign());
-					mCrawlers.push_back(crawler);
-					break;		
-					}
+		case SDLK_x:
+			{
+				// Add a strong crawler
+				float x = GG::RandomFloat(32, mScrWidth - 32.0f);
+				Crawler* crawler = new CrawlerStrong(x, mScrHeight - 1.0f - 32.0f, false);
+				crawler->SetDirection(GG::RandomSign());
+				mCrawlers.push_back(crawler);
+				break;		
+			}
 
-		case SDLK_c:{
-					// Add a crawler
-					float x = GG::RandomFloat(32, mScrWidth - 32.0f);
-					Crawler* crawler = new CrawlerWeak(x, mScrHeight - 1.0f - 32.0f, true);
-					crawler->SetDirection(GG::RandomSign());
-					mCrawlers.push_back(crawler);
-					break;
-					}
+		case SDLK_c:
+			{
+				// Add a weak crawler
+				float x = GG::RandomFloat(32, mScrWidth - 32.0f);
+				Crawler* crawler = new CrawlerWeak(x, mScrHeight - 1.0f - 32.0f, true);
+				crawler->SetDirection(GG::RandomSign());
+				mCrawlers.push_back(crawler);
+				break;
+			}
         }
 		break;
 	}
@@ -485,31 +470,45 @@ void Game::Update(float dt)
 	if (mRobot)
 	{
 		mRobot->Update(dt);
+	}
+
+	// Update the coins
+	std::list<Coin*>::iterator coinIt = mCoins.begin();
+	while (coinIt != mCoins.end())
+	{
+		Coin *coin =   *coinIt;
 		// Check if the robot collides with the coin
-		if (mCoin)
+		if (mRobot->GetCollisonRect().y < coin->GetRect().y + coin->GetRect().h)
 		{
-			if (mRobot->GetCollisonRect().y < mCoin->GetRect().y + mCoin->GetRect().h)
+			if ((mRobot->GetCollisonRect().x < coin->GetRect().x + coin->GetRect().w)
+ 				&& (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > coin->GetRect().x))
 			{
-				if ((mRobot->GetCollisonRect().x < mCoin->GetRect().x + mCoin->GetRect().w)
- 					&& (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w >mCoin->GetRect().x))
+				if ((mRobot->GetCollisonRect().y < coin->GetRect().y + coin->GetRect().h)
+ 				&& (mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > coin->GetRect().y))
 				{
 					//I have found that the sound is delayed...So I start it a bit earlier than the actualy delete of the Coin
-					if (mCoin->GetSoundDelay() == 0)
+					if (coin->GetSoundDelay() == 0)
 					{
 						Mix_PlayChannel(-1, mCoinSound, 0);
-						mCoin->SetSoundDelay(1);
+						coin->SetSoundDelay(1);
 					}
 					//Once it has run through 4 times then it Deletes the coin
-					else if (mCoin->GetSoundDelay() == 5)
+					else if (coin->GetSoundDelay() == 5)
 					{
-						delete mCoin;
-						mCoin = NULL;
+						coinIt = mCoins.erase(coinIt); // remove the entry from the list and advance iterator
+						delete coin;
+						coin = NULL;
 					}
 					else
 					{
-						mCoin->SetSoundDelay(1);
+						coin->SetSoundDelay(1);
 					}
 				}
+			}
+			else
+			{
+				coin->Update(dt);
+				++coinIt;
 			}
 		}
 	}
@@ -526,54 +525,52 @@ void Game::Update(float dt)
 		}
 		else
 		{
-			// If the robot is falling from a jump
-			if (mRobot->GetVerticalVelocity() > 0.0 && mRobot->GetJumping())
+			// If the robot is falling from a jump or just falling
+			if (mRobot->GetVerticalVelocity() > 0.0 && (mRobot->GetJumping() || mRobot->GetFalling()))
 			{
 				// Check if the robot has started squashing the poor crawler
 				if (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > crawler->GetCollisionRect().x && 
-				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
-				mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
+				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w)
 				{
-					if (crawler->IsJumpedOn())
+					if (mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y &&
+						mRobot->GetCollisonRect().y < crawler->GetCollisionRect().y)
 					{
-						Mix_PlayChannel(-1, mStompSound, 0);
-						mRobot->Bounce(-400, false);
-						crawler->SetState(Crawler::CRAWLER_DYING);
+						if (crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
+						{
+							if (crawler->IsJumpedOn())
+							{
+								Mix_PlayChannel(-1, mStompSound, 0);
+								mRobot->Bounce(-400, false);
+								crawler->SetState(Crawler::CRAWLER_DYING);
+							}
+							else
+							{
+								Mix_PlayChannel(-1, mStompSoundNoKill, 0);
+								mRobot->Bounce(-400, false);
+								crawler->SetState(Crawler::CRAWLER_DYING);
+							}
+						}
 					}
-					else
-					{
-						Mix_PlayChannel(-1, mStompSoundNoKill, 0);
-						mRobot->Bounce(-400, false);
-						crawler->SetState(Crawler::CRAWLER_DYING);
-					}
-					
 				}
 			}
-			// If the robot runs into a crawler, the robot must die (but it should not be jumping at this time)
+			// If the robot runs into a crawler, the robot must die (but it should not falling onto it from above)
 			else if (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > crawler->GetCollisionRect().x && 
-				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w &&
-				!mRobot->IsDead() && !mRobot->GetJumping() && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
+				mRobot->GetCollisonRect().x < crawler->GetCollisionRect().x + crawler->GetCollisionRect().w)
 			{
-				Mix_PlayChannel(-1, mDieSound, 0);
-				mRobot->Bounce(-400, true);             // kill the robot
+				if (mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > crawler->GetCollisionRect().y && 
+				mRobot->GetCollisonRect().y < crawler->GetCollisionRect().y + crawler->GetCollisionRect().h)
+				{
+					if (!mRobot->IsDead() && mRobot->GetVerticalVelocity() == -800.0f && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
+					{
+						Mix_PlayChannel(-1, mDieSound, 0);
+						mRobot->Bounce(-400, true);             // kill the robot
+					}
+				}
 			}
 			crawler->Update(dt);
 			++crawlerIt;
 		}
     }
-
-	// Update the coin
-	if (mCoin)
-	{
-		mCoin->Update(dt);
-	}
-	else
-	{
-		float minX = 32;
-		float maxX = mScrWidth - 32.0f;
-		float x = GG::RandomFloat(minX, maxX);
-		mCoin = new Coin(x, mScrHeight - mScrHeight *.33f);
-	}
 
     //
     // update the explosions
@@ -670,14 +667,28 @@ void Game::Draw()
 	if (rectVisible)
 	{
 		// set new color for drawing
+		SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
+		SDL_RenderFillRect(mRenderer, &mRobot->GetTileRect());
+		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
 		// draw the player sprite using the selected color
 		SDL_RenderFillRect(mRenderer, &mRobot->GetCollisonRect());
-		SDL_RenderFillRect(mRenderer, &mCoin->GetRect());
+		for (auto coinIt = mCoins.begin(); coinIt != mCoins.end(); ++coinIt)
+		{
+			Coin* coin = *coinIt;
+			SDL_RenderFillRect(mRenderer, &coin->GetRect());
+		}
 		for (auto crawlerIt = mCrawlers.begin(); crawlerIt != mCrawlers.end(); ++crawlerIt)
 		{
 			Crawler* crawler = *crawlerIt;
 			SDL_RenderFillRect(mRenderer, &crawler->GetCollisionRect());
+		}
+		// set new color for drawing
+		SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
+		for (auto crawlerIt = mCrawlers.begin(); crawlerIt != mCrawlers.end(); ++crawlerIt)
+		{
+			Crawler* crawler = *crawlerIt;
+			SDL_RenderFillRect(mRenderer, &crawler->GetTileRect());
 		}
 	}
 	//
@@ -689,12 +700,14 @@ void Game::Draw()
 	}
 
 	//
-    // draw the coin
+    // draw the coins
     //
-	if (mCoin)
+	std::list<Coin*>::iterator coinIt = mCoins.begin();
+    for ( ; coinIt != mCoins.end(); ++coinIt)
 	{
-		Render(mCoin->GetRenderable(), &mCoin->GetRect(), SDL_FLIP_NONE);
-	}
+        Coin* coin = *coinIt;
+        Render(coin->GetRenderable(), &coin->GetRect(), SDL_FLIP_NONE);
+    }
 
 	//
     // draw the crawlers

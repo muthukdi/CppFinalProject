@@ -17,6 +17,7 @@ Crawler::Crawler(float x, float y, bool jumpedOn)
 , mDieRenderable(NULL)
 , mState(CRAWLER_INIT)
 , mCollisionRect(0, 0, 0, 0)
+, mTileRect(0, 0, 0, 0)
 , mNextThinkTime(0)
 , mJumpedOn(jumpedOn)
 {
@@ -114,6 +115,11 @@ void Crawler::SetState(AIState newState)
 		mIdleRenderable->Rewind();
 		SetRenderable(mDieRenderable);
 
+		break;
+	}
+
+	case CRAWLER_DEAD:
+	{
 		break;
 	}
 

@@ -1,5 +1,6 @@
 #include "Robot.h"
 #include "Game.h"
+#include "Grid.h"
 
 const float Robot::GRAVITY = 2500.0f;
 
@@ -13,8 +14,10 @@ Robot::Robot(float x, float y)
 	, mRenderableJump(NULL)
 	, mRenderableDie(NULL)
 	, mCollisionRect(0,0,0,0)
+	, mTileRect(0,0,0,0)
 	, mDirection(0)
 	, mJumping(0)
+	, mFalling(0)
 	, mDead(0)
 	, mVelocityY(-800.0f)
 {
@@ -31,7 +34,7 @@ Robot::Robot(float x, float y)
 
 	mRenderable = mRenderableIdle;
 	mRect.x = (int)x;
-	mRect.y =(int) y;
+	mRect.y = (int)y;
 	mRect.w = (int)mRenderable->GetWidth();
 	mRect.h = (int)mRenderable->GetHeight();
 
@@ -54,36 +57,84 @@ void Robot::Update(float dt)
 {
 	const float runningSpeed = 200;  // in pixels per second
 	Game* game = Game::GetInstance();
+
+	// Get the tile that's directly beneath the robot's feet
+	int tileWidth = game->GetGrid()->TileWidth();
+    int tileHeight = game->GetGrid()->TileHeight();
+	mTileRect.w = tileWidth;
+	mTileRect.h = tileHeight;
+	int row = (mCollisionRect.y + mCollisionRect.h)/tileHeight;
+	int column = (mCollisionRect.x + mCollisionRect.w/2)/tileWidth;
+	GG::Renderable *tileRenderable = game->GetGrid()->GetTile(row, column)->GetRenderable();
+	mTileRect.x = column*tileWidth;
+	mTileRect.y = row*tileHeight;
 	
 	// Kill the robot with a bounce!  If the robot is dead, it's not allowed to do 
 	// anything else until it's brought back to life by using the "R" key (resurrect)
 	if (mDead == 1)
 	{
-		if (mRenderable != mRenderableDie){
-			mRenderableDie->Rewind();
+		if (mRenderable != mRenderableDie)
+		{
 			mRenderable = mRenderableDie;
 		}
 		if (game->IsKeyDown(SDL_SCANCODE_R) && mVelocityY == 0)
 		{
 			mDead = 0;
 			mRenderableDie->Rewind();
-			mVelocityY = -800;
-			mRect.y = game->GetScrHeight() - 160;
+			mVelocityY = -800.0f;
+			mRect.y = mTileRect.y - mRect.h;
 			return;
 		}
 		mVelocityY += GRAVITY * dt;
-		mPosY += dt * mVelocityY;
-		// If it's below it's original height
-		if (mPosY > game->GetScrHeight() - 160)
+		mRect.y += (int)(dt * mVelocityY);
+		// If there is a tile directly beneath the robot's body
+		// AND it's on its way down
+		if (tileRenderable && mVelocityY > 0.0f)
 		{
-			mPosY = game->GetScrHeight() - 160.0f;
-			mVelocityY = 0.0;
+			if (mCollisionRect.y + mCollisionRect.h > mTileRect.y)
+			{
+				mRect.y = mTileRect.y - mRect.h;
+				printf("\n%i", mRect.y + mRect.h);
+				mVelocityY = 0.0f;
+			}
 		}
-		mRect.y = (int)mPosY;
+		// Set the collision rectangle
+		if (mDirection == 0)
+		{
+			mCollisionRect.x = mRect.x + mRect.w / 4 -5;
+			mCollisionRect.w = mRect.w / 2;
+			mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
+			mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+		}
+		else
+		{
+			mCollisionRect.x = mRect.x + mRect.w / 3;
+			mCollisionRect.w = mRect.w / 2;
+			mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
+			mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+		}
 		mRenderable->Animate(dt);
 		return;
 	}
-	if (game->IsKeyDown(SDL_SCANCODE_SPACE))
+	// Change movement renderables and states based on key input
+	if (mFalling)
+	{
+		mVelocityY += GRAVITY * dt;
+		mRect.y += (int)(dt * mVelocityY);
+		// If there is a tile directly beneath the robot's feet
+		// AND it's on its way down
+		if (tileRenderable && mVelocityY > 0.0f)
+		{
+			if (mCollisionRect.y + mCollisionRect.h > mTileRect.y)
+			{
+				mRect.y = mTileRect.y - mRect.h;
+				printf("\n%i", mRect.y + mRect.h);
+				mFalling = 0;
+				mVelocityY = -800.0f;
+			}
+		}
+	}
+	else if (game->IsKeyDown(SDL_SCANCODE_SPACE))
 	{
 		if (mJumping == 0)
 		{
@@ -106,7 +157,7 @@ void Robot::Update(float dt)
 		}
 		else
 		{
-			//Else, if the renderable is not Run then set it to idle
+			//Else, if the renderable is not Run then set it to run
 			if (mRenderable != mRenderableRun)
 			{
 				mRenderable = mRenderableRun;
@@ -126,7 +177,8 @@ void Robot::Update(float dt)
 			}
 		}
 		//Else, if the renderable is not Idle then set it to idle
-		else{
+		else
+		{
 			if (mRenderable != mRenderableIdle)
 			{
 				mRenderable = mRenderableIdle;
@@ -137,19 +189,20 @@ void Robot::Update(float dt)
 	if (mJumping == 1)
 	{
  		mVelocityY += GRAVITY * dt;
-		mPosY += dt * mVelocityY;
-		// If it's below it's original height
-		if (mPosY > game->GetScrHeight() - 160.0f)
+		mRect.y += (int)(dt * mVelocityY);
+		// If there is a tile directly beneath the robot's feet
+		// AND it's on it's way down
+		if (tileRenderable && mVelocityY > 0.0f)
 		{
-			mPosY = game->GetScrHeight() - 160.0f;
-			mJumping = 0;
-			mVelocityY = -800.0f;
+			if (mCollisionRect.y + mCollisionRect.h > mTileRect.y)
+			{
+				mRect.y = mTileRect.y - mRect.h;
+				mJumping = 0;
+				mVelocityY = -800.0f;
+			}
 		}
- 		mRect.y =(int) mPosY;
-		
-		//mRenderable->Animate(dt);
 	}
-
+	// Change the robot's horizontal position based on key input
     if (game->IsKeyDown(SDL_SCANCODE_A)) 
 	{
 		if (mDirection == 0)
@@ -180,6 +233,8 @@ void Robot::Update(float dt)
 			mRect.x += (int)ceil(dt * runningSpeed);
 		}
     }
+
+	// Set the collision rectangle
 	if (mDirection == 0)
 	{
 		mCollisionRect.x = mRect.x + mRect.w / 4 -5;
@@ -194,7 +249,17 @@ void Robot::Update(float dt)
 		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
 		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
 	}
-mRenderable->Animate(dt);
+	
+	// If there is no ground beneath you, then start falling
+	// but not if you are already either jumping or falling!
+	if (!tileRenderable && !mJumping && !mFalling)
+	{
+		mFalling = 1;
+		mVelocityY = 0.0f;
+		mRenderableJump->Rewind();
+		mRenderable = mRenderableJump;
+	}
+	mRenderable->Animate(dt);
 
 }
 

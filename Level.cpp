@@ -4,6 +4,10 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "Crawler.h"
+#include "CrawlerWeak.h"
+#include "CrawlerStrong.h"
+#include "Coin.h"
 
 Grid* CreateRandomLevel(const std::string& tileTexName)
 {
@@ -28,14 +32,6 @@ Grid* CreateRandomLevel(const std::string& tileTexName)
     Grid* grid = new Grid;
     grid->Allocate(numCols, numRows, tileWidth, tileHeight);
 
-    // generate a random arrangement of tiles (and blanks) in the grid
-    /* (int x = 0; x < numCols; x++) {
-
-        Tile* tile = grid->GetTile(numRows-1, x);
-        int r = GG::RandomInt(numTiles);
-
-        tile->SetRenderable(new GG::Renderable(tex, r));
-    }*/
 	for (int y = 0; y < numRows; y++) {
         for (int x = 0; x < numCols; x++) {
 
@@ -97,9 +93,10 @@ Grid* LoadLevel(const std::string& filename)
 	GG::Texture* tex = game->GetTextureManager()->GetTexture("Tiles");
 
 	int numCells = tex->GetNumCells();
-
+	int tileWidth = tex->GetCellWidth();
+    int tileHeight = tex->GetCellHeight();
 	Grid* grid = new Grid;
-	grid->Allocate(numCols, numRows, 40, 32);
+	grid->Allocate(numCols, numRows, tileWidth, tileHeight);
 
 	for (unsigned row = 0; row < numRows; row++)
 	{
@@ -111,6 +108,26 @@ Grid* LoadLevel(const std::string& filename)
 			{
 			case '.':
 				break;
+			case 'w':
+			{
+				Crawler* crawler = new CrawlerWeak(col*tileWidth, (row+1)*tileHeight, true);
+				crawler->SetDirection(GG::RandomSign());
+				game->GetCrawlers()->push_back(crawler);
+				break;
+			}
+			case 's':
+			{
+				Crawler* crawler = new CrawlerStrong(col*tileWidth, (row+1)*tileHeight, false);
+				crawler->SetDirection(GG::RandomSign());
+				game->GetCrawlers()->push_back(crawler);
+				break;
+			}
+			case 'c':
+			{
+				//Coin* coin = new Coin(col*tileWidth, (row+1)*tileHeight);
+				//game->GetCoins()->push_back(coin);
+				break;
+			}
 			case '#':
 			{
 				int r = GG::RandomInt(numCells);

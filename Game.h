@@ -63,8 +63,8 @@ class Game {
 	Robot*					mRobot;
 	Layer*					mBackground;
 	Layer*					mForeground;
-	Coin*					mCoin;
 	std::list<Crawler*>     mCrawlers;
+	std::list<Coin*>		mCoins;
 	int						mScene;
 
 	bool					rectVisible;
@@ -92,6 +92,8 @@ public:
 
     bool                    IsKeyDown(SDL_Scancode s)   { return mKeyState[s] != 0; }
 	void					PlaySound(std::string name);
+	std::list<Crawler*>*	GetCrawlers()				{ return &mCrawlers; }
+	std::list<Coin*>*		GetCoins()					{ return &mCoins; }
 
 private:
                             Game();

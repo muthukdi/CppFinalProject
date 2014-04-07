@@ -33,5 +33,4 @@ Coin::~Coin()
 void Coin::Update(float dt)
 {
 	mRenderable->Animate(dt);
-
 }

@@ -12,6 +12,7 @@ class Crawler {
 		GG::Renderable*             mRenderable;
 		GG::Rect                    mRect;
 		GG::Rect					mCollisionRect;
+		GG::Rect					mTileRect; // the tile that's directly beneath the crawler
 
 		float                       mPosX;
 		float                       mPosY;
@@ -43,6 +44,7 @@ class Crawler {
 		const GG::Renderable*       GetRenderable() const   { return mRenderable; }
 		const GG::Rect&             GetRect() const         { return mRect; }
 		const GG::Rect&				GetCollisionRect() const		{ return mCollisionRect; }
+		const GG::Rect&				GetTileRect() const				{ return mTileRect; }
 
 		float                       GetLeft() const         { return mPosX; }
 		float                       GetRight() const        { return mPosX + mRect.w; }
