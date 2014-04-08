@@ -42,6 +42,9 @@ class Renderable {
 
     Rect                    mFrameRect;     // current frame rect (cell in sprite sheet)
 
+	double                  mRotAngle;      // rotation angle in degrees
+	Point                   mRotOrigin;     // rotation origin
+
 public:
                             Renderable(const Texture* tex);
                             Renderable(const Texture* tex, int cellNo);
@@ -64,6 +67,12 @@ public:
     void                    Rewind()                { mTime = 0.0f; }
 
     void                    Animate(float dt);
+
+	double                  GetRotationAngle() const        { return mRotAngle; }
+    void                    SetRotationAngle(double angle)  { mRotAngle = angle; }
+
+	const Point&            GetRotationOrigin() const               { return mRotOrigin; }
+    void                    SetRotationOrigin(const Point& origin)  { mRotOrigin = origin; }
 };
 
 } // end of namespace

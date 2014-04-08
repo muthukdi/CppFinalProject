@@ -302,6 +302,7 @@ void Robot::Bounce(float velocity, bool killed)
 { 
 	if (killed)
 	{
+		mJumping = 0;
 		mDead = 1;
 	}
 	else

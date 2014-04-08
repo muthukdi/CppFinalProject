@@ -41,6 +41,35 @@ struct Rect : public SDL_Rect {
     }
 };
 
+/*
+================================================================================
+
+Point class
+
+    Use the Point class wherever an SDL_Point structure would be used.
+
+    This class inherits all members of SDL_Point and keeps them publicly
+    visible.  The benefit of using Point over SDL_Point is that Point adds
+    constructors.
+
+    It's a bit hacky, but it works, and it's very convenient.
+
+================================================================================
+*/
+struct Point : public SDL_Point {
+
+    Point()
+    {
+        x = 0;
+        y = 0;
+    }
+
+    Point(int x, int y)
+    {
+        this->x = x;
+        this->y = y;
+    }
+};
 
 /*
 ================================================================================
