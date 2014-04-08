@@ -13,6 +13,8 @@ Robot::Robot(float x, float y)
 	, mRenderableRun(NULL)
 	, mRenderableJump(NULL)
 	, mRenderableDie(NULL)
+	, mRenderableWalk(NULL)
+	, mRenderableCelebrate(NULL)
 	, mCollisionRect(0,0,0,0)
 	, mBottomTileRect(0,0,0,0)
 	, mTopTileRect(0,0,0,0)
@@ -20,6 +22,7 @@ Robot::Robot(float x, float y)
 	, mJumping(0)
 	, mFalling(0)
 	, mDead(0)
+	, mAutoPilot(0)
 	, mVelocityY(-850.0f)
 {
 	Game* game = Game::GetInstance();
@@ -32,6 +35,10 @@ Robot::Robot(float x, float y)
 	mRenderableJump = new GG::Renderable(tex, 1.0f, true);
 	tex = texMgr->GetTexture("RobotDie");
 	mRenderableDie = new GG::Renderable(tex, 1.4f, false);
+	tex = texMgr->GetTexture("RobotWalk");
+	mRenderableWalk = new GG::Renderable(tex, 1.0f, true);
+	tex = texMgr->GetTexture("RobotCelebrate");
+	mRenderableCelebrate = new GG::Renderable(tex, 1.4f, true);
 
 	mRenderable = mRenderableIdle;
 	mRect.x = (int)x;
@@ -48,11 +55,14 @@ Robot::~Robot()
 	delete mRenderableRun;
 	delete mRenderableJump;
 	delete mRenderableDie;
+	delete mRenderableWalk;
+	delete mRenderableCelebrate;
 }
 
 void Robot::Update(float dt)
 {
 	const float runningSpeed = 200;  // in pixels per second
+	const float walkingSpeed = 10;  // in pixels per second
 	Game* game = Game::GetInstance();
 
 	// Get the tiles that're directly above and beneath the robot's feet
@@ -73,6 +83,27 @@ void Robot::Update(float dt)
 	mTopTileRect.x = column*tileWidth;
 	mTopTileRect.y = row*tileHeight;
 	//printf("\nRobot(%i, %i, %i, %i)", mCollisionRect.x, mCollisionRect.y, mCollisionRect.w, mCollisionRect.h);
+
+	// This means that the robot's controls have been disabled and the
+	// computer is trying to play the game over animation
+	if (mAutoPilot == 1)
+	{
+		if (mDirection == 1)
+		{
+			mDirection = 0;
+		}
+		if (mRect.x + mRect.w > game->GetFlagPole()->GetRect().x)
+		{
+			mRenderable = mRenderableCelebrate;
+		}
+		else
+		{
+			mRect.x += (int)ceil(dt * walkingSpeed);
+			SetCollisionRect();
+		}
+		mRenderable->Animate(dt);
+		return;
+	}
 
 	// Kill the robot with a bounce!  If the robot is dead, it's not allowed to do 
 	// anything else until it's brought back to life by using the "R" key (resurrect)
@@ -250,7 +281,6 @@ void Robot::Update(float dt)
 		mRenderable = mRenderableJump;
 	}
 	mRenderable->Animate(dt);
-
 }
 
 // Bounce a little after stomping on a crawler or getting killed
@@ -283,5 +313,14 @@ void Robot::SetCollisionRect()
 		mCollisionRect.w = mRect.w / 2;
 		mCollisionRect.y = mRect.y + mRect.h / 3 + 5;
 		mCollisionRect.h = mRect.h - mRect.h / 3 - 5;
+	}
+}
+
+void Robot::SetAutoPilot(bool mode)	
+{
+	if (mAutoPilot != mode)
+	{
+		mAutoPilot = mode; 
+		mRenderable = mRenderableWalk;
 	}
 }

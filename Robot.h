@@ -14,6 +14,8 @@ protected:
 	GG::Renderable*			mRenderableRun;
 	GG::Renderable*			mRenderableJump;
 	GG::Renderable*			mRenderableDie;
+	GG::Renderable*			mRenderableWalk;
+	GG::Renderable*			mRenderableCelebrate;
 
 	GG::Rect				mCollisionRect;
 	GG::Rect				mBottomTileRect; // the tile that's directly above the robot
@@ -22,6 +24,7 @@ protected:
 	bool					mJumping; // (1 for jumping and 0 for not jumping)
 	bool					mFalling; // (1 for falling and 0 for not falling)
 	bool					mDead; // (1 for dead and 0 for not dead)
+	bool					mAutoPilot; // The game will control the robot!
 	float					mVelocityY;
 	static const float		GRAVITY;
 
@@ -40,6 +43,7 @@ public:
 	void					SetCollisionRect();
 	const bool				IsDead() const						{ return mDead; }
 	void					KillRobot()							{ mDead = 1; }
+	void					SetAutoPilot(bool mode);
 	void					Bounce(float velocity, bool killed);
 	const float				GetVerticalVelocity() const			{ return mVelocityY; }
 	void					Update(float dt);

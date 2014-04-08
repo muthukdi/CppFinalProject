@@ -38,6 +38,7 @@ Game::Game()
 	, mStompSoundNoKill(NULL)
 	, mDieSound(NULL)
 	, mBlockSound(NULL)
+	, mGameOverMusic(NULL)
 	, mMusic(NULL)
 {
 }
@@ -208,46 +209,23 @@ bool Game::Initialize()
 
 	//Load musicIn
 	mMusic = Mix_LoadMUS("media/music.wav");
-	if (mMusic == NULL)
+	mGameOverMusic = Mix_LoadMUS("media/gameover_music.wav");
+	if (mMusic == NULL || mGameOverMusic == NULL)
 	{
 		std::cerr << " Failed to load beat music! SDL_mixer Error:" << Mix_GetError() << std::endl;
 		return false;
 	}
 	//loading the Coin Sound
-	mCoinSound = Mix_LoadWAV("media/coin_sound.wav");
-	mJumpSound = Mix_LoadWAV("media/jump_sound.wav");
-	mStompSound = Mix_LoadWAV("media/stomp_sound.wav");
-	mStompSoundNoKill = Mix_LoadWAV("media/stomp_sound_nokill.wav");
-	mDieSound = Mix_LoadWAV("media/die_sound.wav");
-	mBlockSound = Mix_LoadWAV("media/block_sound.wav");
-	if (mCoinSound == NULL || mJumpSound == NULL || mStompSound == NULL || mDieSound == NULL || mStompSoundNoKill == NULL || mBlockSound == NULL)
+	LoadSounds();
+	if (mCoinSound == NULL || mJumpSound == NULL || mStompSound == NULL || 
+		mDieSound == NULL || mStompSoundNoKill == NULL || mBlockSound == NULL)
 	{
 		std::cerr << "*** Failed to initialize mCoinSound" << Mix_GetError()<<std::endl;
 		return false;
 	}
 
     // load textures
-	mTexMgr->LoadTexture("Background1", "Layer1.png");
-	mTexMgr->LoadTexture("Background2", "Layer2.png");
-	mTexMgr->LoadTexture("Background3", "Layer3.png");
-	mTexMgr->LoadTexture("Background4", "Layer4.png");
-	mTexMgr->LoadTexture("Background5", "Layer5.png");
-	mTexMgr->LoadTexture("Background6", "Layer6.png");
-	mTexMgr->LoadTexture("Foreground", "Layer0.png");
-    mTexMgr->LoadTexture("Tiles", "tiles.tga", 7);
-	mTexMgr->LoadTexture("Tiles2", "tiles2.tga", 7);
-    mTexMgr->LoadTexture("Explosion", "explosion.tga", 16);
-	mTexMgr->LoadTexture("RobotIdle", "robot_idle.png", 8);
-	mTexMgr->LoadTexture("RobotRun", "robot_run.png", 6);
-	mTexMgr->LoadTexture("RobotJump", "robot_jump.png", 8);
-	mTexMgr->LoadTexture("RobotDie", "robot_die.png", 8);
-	mTexMgr->LoadTexture("Meteor", "meteor.png");
-	mTexMgr->LoadTexture("CrawlerWalk", "crawler_walk.png", 8);
-    mTexMgr->LoadTexture("CrawlerIdle", "crawler_idle.png", 8);
-	mTexMgr->LoadTexture("CrawlerWalkPink", "crawler_walk_pink.png", 8);
-	mTexMgr->LoadTexture("CrawlerIdlePink", "crawler_idle_pink.png", 8);
-	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
-	mTexMgr->LoadTexture("Coin", "coin.png", 10);
+	LoadTextures();
 
     // initialize grid from a text file (including crawlers and coins!)
     LoadScene(mScene);
@@ -284,10 +262,16 @@ void Game::Shutdown()
 	mStompSound = NULL;
 	Mix_FreeChunk(mDieSound);
 	mDieSound = NULL;
+	Mix_FreeChunk(mStompSoundNoKill);
+	mStompSoundNoKill = NULL;
+	Mix_FreeChunk(mBlockSound);
+	mBlockSound = NULL;
 
 	//Free the music
 	Mix_FreeMusic(mMusic);
 	mMusic = NULL;
+	Mix_FreeMusic(mGameOverMusic);
+	mGameOverMusic = NULL;
 
 	//We also need to quit the mixer
 	Mix_Quit();
@@ -420,7 +404,14 @@ void Game::HandleEvent(const SDL_Event& e)
 			if (Mix_PlayingMusic() == 0)
 			{
 				//Play the music
-				Mix_PlayMusic(mMusic, -1);
+				if (mScene < 5)
+				{
+					Mix_PlayMusic(mMusic, -1);
+				}
+				else
+				{
+					Mix_PlayMusic(mGameOverMusic, -1);
+				}
 			}
 			//If music is being played
 			else
@@ -478,6 +469,16 @@ void Game::Update(float dt)
 	// Update the robot
 	if (mRobot)
 	{
+		// If the robot has reached the last scene
+		// disable its controls and play game over animation
+		if (mScene == 5 && !mRobot->GetJumping() && !mRobot->GetFalling())
+		{
+			if (Mix_PlayMusic(mGameOverMusic, -1) == -1)
+			{
+			   printf("Mix_PlayMusic: %s\n", Mix_GetError());
+			}
+			mRobot->SetAutoPilot(true);
+		}
 		mRobot->Update(dt);
 	}
 
@@ -625,6 +626,10 @@ void Game::Draw()
 	if (mForeground)
 	{
 		//Render(mForeground->GetRenderable(), &mForeground->GetRect(), SDL_FLIP_NONE);
+	}
+	if (mFlagPole)
+	{
+		Render(mFlagPole->GetRenderable(), &mFlagPole->GetRect(), SDL_FLIP_NONE);
 	}
 
     //
@@ -815,8 +820,52 @@ void Game::LoadScene(int scene)
 	mGrid = NULL;
 
 	std::stringstream b, t;
-	t << "media/" << mScene%6 << ".txt";
-	b << "Background" << mScene%6 + 1;;
+	t << "media/" << mScene << ".txt";
+	b << "Background" << mScene + 1;;
 	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str());
 	mGrid = LoadLevel(t.str());
+
+	// Game over scene
+	if (mScene == 5)
+	{
+		mFlagPole = new Layer(mScrWidth *.8f, mScrHeight *.5f + 20, "FlagPole");
+	}
+}
+
+void Game::LoadTextures()
+{
+	mTexMgr->LoadTexture("Background1", "Layer1.png");
+	mTexMgr->LoadTexture("Background2", "Layer2.png");
+	mTexMgr->LoadTexture("Background3", "Layer3.png");
+	mTexMgr->LoadTexture("Background4", "Layer4.png");
+	mTexMgr->LoadTexture("Background5", "Layer5.png");
+	mTexMgr->LoadTexture("Background6", "Layer6.png");
+	mTexMgr->LoadTexture("Foreground", "Layer0.png");
+    mTexMgr->LoadTexture("Tiles", "tiles.tga", 7);
+	mTexMgr->LoadTexture("Tiles2", "tiles2.tga", 7);
+    mTexMgr->LoadTexture("Explosion", "explosion.tga", 16);
+	mTexMgr->LoadTexture("RobotIdle", "robot_idle.png", 8);
+	mTexMgr->LoadTexture("RobotRun", "robot_run.png", 6);
+	mTexMgr->LoadTexture("RobotJump", "robot_jump.png", 8);
+	mTexMgr->LoadTexture("RobotDie", "robot_die.png", 8);
+	mTexMgr->LoadTexture("RobotWalk", "robot_walk.png", 8);
+	mTexMgr->LoadTexture("RobotCelebrate", "robot_celebrate.png", 13);
+	mTexMgr->LoadTexture("Meteor", "meteor.png");
+	mTexMgr->LoadTexture("CrawlerWalk", "crawler_walk.png", 8);
+    mTexMgr->LoadTexture("CrawlerIdle", "crawler_idle.png", 8);
+	mTexMgr->LoadTexture("CrawlerWalkPink", "crawler_walk_pink.png", 8);
+	mTexMgr->LoadTexture("CrawlerIdlePink", "crawler_idle_pink.png", 8);
+	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
+	mTexMgr->LoadTexture("Coin", "coin.png", 10);
+	mTexMgr->LoadTexture("FlagPole", "flagpole.png");
+}
+
+void Game::LoadSounds()
+{
+	mCoinSound = Mix_LoadWAV("media/coin_sound.wav");
+	mJumpSound = Mix_LoadWAV("media/jump_sound.wav");
+	mStompSound = Mix_LoadWAV("media/stomp_sound.wav");
+	mStompSoundNoKill = Mix_LoadWAV("media/stomp_sound_nokill.wav");
+	mDieSound = Mix_LoadWAV("media/die_sound.wav");
+	mBlockSound = Mix_LoadWAV("media/block_sound.wav");
 }

@@ -63,6 +63,7 @@ class Game {
 	Robot*					mRobot;
 	Layer*					mBackground;
 	Layer*					mForeground;
+	Layer*					mFlagPole;
 	std::list<Crawler*>     mCrawlers;
 	std::list<Coin*>		mCoins;
 	int						mScene;
@@ -75,6 +76,7 @@ class Game {
 	Mix_Chunk*				mDieSound;
 	Mix_Chunk*				mBlockSound;
 	Mix_Music*				mMusic;
+	Mix_Music*				mGameOverMusic;
 
 public:
     static Game*            GetInstance();
@@ -91,13 +93,16 @@ public:
     Grid*                   GetGrid() const             { return mGrid; }
 	Robot*					GetRobot() const		    { return mRobot; }
 	int*					GetScene()					{ return &mScene; }
+	Layer*					GetFlagPole() const			{ return mFlagPole; }
 
     bool                    IsKeyDown(SDL_Scancode s)   { return mKeyState[s] != 0; }
 	void					PlaySound(std::string name);
-	void					Game::StopSounds();
+	void					StopSounds();
 	std::list<Crawler*>*	GetCrawlers()				{ return &mCrawlers; }
 	std::list<Coin*>*		GetCoins()					{ return &mCoins; }
 	void					LoadScene(int scene);
+	void					LoadTextures();
+	void					LoadSounds();
 
 private:
                             Game();
