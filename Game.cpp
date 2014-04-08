@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 
 #include <iostream>
+#include <sstream>
 
 /*
 ================================================================================
@@ -226,11 +227,15 @@ bool Game::Initialize()
 	}
 
     // load textures
+	mTexMgr->LoadTexture("Background1", "Layer1.png");
 	mTexMgr->LoadTexture("Background2", "Layer2.png");
-    mTexMgr->LoadTexture("Background", "Layer1.png");
 	mTexMgr->LoadTexture("Background3", "Layer3.png");
+	mTexMgr->LoadTexture("Background4", "Layer4.png");
+	mTexMgr->LoadTexture("Background5", "Layer5.png");
+	mTexMgr->LoadTexture("Background6", "Layer6.png");
 	mTexMgr->LoadTexture("Foreground", "Layer0.png");
     mTexMgr->LoadTexture("Tiles", "tiles.tga", 7);
+	mTexMgr->LoadTexture("Tiles2", "tiles2.tga", 7);
     mTexMgr->LoadTexture("Explosion", "explosion.tga", 16);
 	mTexMgr->LoadTexture("RobotIdle", "robot_idle.png", 8);
 	mTexMgr->LoadTexture("RobotRun", "robot_run.png", 6);
@@ -245,11 +250,12 @@ bool Game::Initialize()
 	mTexMgr->LoadTexture("Coin", "coin.png", 10);
 
     // initialize grid from a text file (including crawlers and coins!)
-    mGrid = LoadLevel("media/0.txt");
+    LoadScene(mScene);
 
 	// initialize the robot
 	mRobot = new Robot(350.0f, mScrHeight-160.0f-32.0f);
-	mBackground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Background");
+
+	// initialize the foreground
 	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
 
 	// Play the background music
@@ -373,12 +379,19 @@ void Game::HandleEvent(const SDL_Event& e)
             mShouldQuit = true;
             break;
 
-        case SDLK_r:
+        case SDLK_k:
             //
-            // repopulate the grid
+            // Removes all the crawlers
             //
-            //delete mGrid;
-            //mGrid = CreateRandomLevel("Tiles");
+			{
+				std::list<Crawler*>::iterator crawlerIter = mCrawlers.begin();
+				for ( ; crawlerIter != mCrawlers.end(); ++crawlerIter)
+				{
+					Crawler* crawler = *crawlerIter;
+					delete crawler;
+				}
+				mCrawlers.clear();
+			}
             break;
 
         case SDLK_p:
@@ -397,18 +410,11 @@ void Game::HandleEvent(const SDL_Event& e)
             }
             break;
 		case SDLK_v:
-			//
-			// show/hide collision rectangle
-			//
-			if (rectVisible)
 			{
-				rectVisible = 0;
+				// show/hide collision rectangle
+				rectVisible ? 0 : 1;
+				break;
 			}
-			else
-			{
-				rectVisible = 1;
-			}
-			break;
 		case SDLK_9:
 			//If there is no music playing
 			if (Mix_PlayingMusic() == 0)
@@ -808,19 +814,9 @@ void Game::LoadScene(int scene)
 	delete mGrid;
 	mGrid = NULL;
 
-	if (mScene % 3 == 0)
-	{
-		mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background");
-		mGrid = LoadLevel("media/0.txt");
-	}
-	else if (mScene % 3 == 1)
-	{
-		mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background2");
-		mGrid = LoadLevel("media/1.txt");
-	}
-	else
-	{
-		mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, "Background3");
-		mGrid = LoadLevel("media/2.txt");
-	}
+	std::stringstream b, t;
+	t << "media/" << mScene%6 << ".txt";
+	b << "Background" << mScene%6 + 1;;
+	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str());
+	mGrid = LoadLevel(t.str());
 }

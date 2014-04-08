@@ -40,7 +40,6 @@ Robot::Robot(float x, float y)
 	mRect.h = (int)mRenderable->GetHeight();
 
 	SetCollisionRect();
-
 }
 
 Robot::~Robot()
@@ -73,6 +72,7 @@ void Robot::Update(float dt)
 	GG::Renderable *topTileRenderable = game->GetGrid()->GetTile(row, column)->GetRenderable();
 	mTopTileRect.x = column*tileWidth;
 	mTopTileRect.y = row*tileHeight;
+	//printf("\nRobot(%i, %i, %i, %i)", mCollisionRect.x, mCollisionRect.y, mCollisionRect.w, mCollisionRect.h);
 
 	// Kill the robot with a bounce!  If the robot is dead, it's not allowed to do 
 	// anything else until it's brought back to life by using the "R" key (resurrect)
@@ -225,7 +225,7 @@ void Robot::Update(float dt)
 		{
 			mDirection = 0;
 		}
-		if (mRect.x >= game->GetScrWidth() + 64.0 - mRect.w)
+		if (mRect.x >= game->GetScrWidth() + 10.0 - mRect.w)
 		{
 			mRect.x = -10;
 			int *scene = game->GetScene();
@@ -242,7 +242,7 @@ void Robot::Update(float dt)
 	
 	// If there is no ground beneath you, then start falling
 	// but not if you are already either jumping or falling!
-	if (!bottomTileRenderable && !mJumping && !mFalling)
+	if (!bottomTileRenderable && !mJumping && !mFalling )
 	{
 		mFalling = 1;
 		mVelocityY = 0.0f;

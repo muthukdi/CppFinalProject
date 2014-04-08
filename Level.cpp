@@ -91,6 +91,7 @@ Grid* LoadLevel(const std::string& filename)
 
 	Game* game = Game::GetInstance();
 	GG::Texture* tex = game->GetTextureManager()->GetTexture("Tiles");
+	GG::Texture* tex2 = game->GetTextureManager()->GetTexture("Tiles2");
 
 	int numCells = tex->GetNumCells();
 	int tileWidth = tex->GetCellWidth();
@@ -126,6 +127,12 @@ Grid* LoadLevel(const std::string& filename)
 			{
 				//Coin* coin = new Coin(col*tileWidth, (row+1)*tileHeight);
 				//game->GetCoins()->push_back(coin);
+				break;
+			}
+			case '@':
+			{
+				int r = GG::RandomInt(numCells);
+				tile->SetRenderable(new GG::Renderable(tex2, r));
 				break;
 			}
 			case '#':
