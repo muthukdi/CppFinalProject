@@ -28,6 +28,7 @@ Game::Game()
     , mTexMgr(NULL)
     , mShouldQuit(false)
     , mTime(0.0f)
+	, mMeteorTime(0.0f)
     , mGrid(NULL)
 	, mRobot(NULL)
 	, mScene(0)
@@ -229,7 +230,7 @@ bool Game::Initialize()
 	LoadTextures();
 
     // initialize grid from a text file (including crawlers and coins!)
-    LoadScene(mScene);
+    LoadScene(mScene, true);
 
 	// initialize the robot
 	mRobot = new Robot(350.0f, mScrHeight-160.0f-32.0f);
@@ -291,6 +292,13 @@ void Game::Shutdown()
         delete *it;
     }
     mExplosions.clear();
+
+	// delete all meteors
+    std::list<Meteor*>::iterator metIt = mMeteors.begin();
+    for ( ; metIt != mMeteors.end(); ++metIt) {
+        delete *metIt;
+    }
+    mMeteors.clear();
 
 	// delete all crawlers and clear the list
     std::list<Crawler*>::iterator crawlerIter = mCrawlers.begin();
@@ -397,7 +405,7 @@ void Game::HandleEvent(const SDL_Event& e)
 		case SDLK_v:
 			{
 				// show/hide collision rectangle
-				rectVisible ? 0 : 1;
+				rectVisible = rectVisible ? 0 : 1;
 				break;
 			}
 		case SDLK_9:
@@ -472,7 +480,7 @@ void Game::Update(float dt)
 	{
 		// If the robot has reached the last scene
 		// disable its controls and play game over animation
-		if (mScene == 5 && !mRobot->GetJumping() && !mRobot->GetFalling())
+		if (mScene == 6 && !mRobot->GetJumping() && !mRobot->GetFalling())
 		{
 			
 			//if (Mix_PlayMusic(mGameOverMusic, -1) == -1)
@@ -615,6 +623,57 @@ void Game::Update(float dt)
             ++it;                   // advance list iterator
         }
     }
+
+	//
+    // update the meteors
+    //
+    std::list<Meteor*>::iterator metIt = mMeteors.begin();
+    while (metIt != mMeteors.end())
+	{
+        Meteor* entity = *metIt;        // get a pointer to this meteor
+
+		// If the meteor has either reached the ground, destroy it with an explosion
+        if (entity->GetRect().y > mScrHeight-32-64) 
+		{
+			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
+            mExplosions.push_back(boom);
+            metIt = mMeteors.erase(metIt); // remove the entry from the list and advance iterator
+            delete entity;              // delete the object
+        }
+		// If the meteor has hit the robot, destroy it with an explosion and also kill the robot
+		// Note:  I'm not factoring in the height of the meteor to detect collision here because
+		// it just so happens that it's as big as the white space above the robot's head!
+		else if (entity->GetRect().y > mRobot->GetRect().y &&
+				entity->GetRect().x + entity->GetRect().w > mRobot->GetRect().x + 15 &&
+				entity->GetRect().x < mRobot->GetRect().x + mRobot->GetRect().w - 15 && !mRobot->IsDead())
+		{
+			Mix_PlayChannel(-1, mDieSound, 0);
+			mRobot->Bounce(-400, true);             // kill the robot
+			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
+            mExplosions.push_back(boom);
+            metIt = mMeteors.erase(metIt); // remove the entry from the list and advance iterator
+            delete entity;              // delete the object
+		}
+		else
+		{
+            entity->Update(dt);     // update the entity
+            ++metIt;                   // advance list iterator
+        }
+    }
+
+	//
+    // create a new meteor every 1 second in scene 5
+    //
+	if (mTime - mMeteorTime > 1.0 && mScene == 5)
+	{
+		int randomX = GG::RandomInt(mScrWidth-64);
+		int randomRotation = GG::RandomInt(90) + 180;
+		randomRotation = (randomRotation % 2) ? randomRotation : -randomRotation;
+		Meteor* meteor = new Meteor(randomX, -64.0, (double)randomRotation);  
+		mMeteors.push_back(meteor);
+		// timestamp this meteor!
+		mMeteorTime = mTime;
+	}
 }
 
 /*
@@ -692,6 +751,11 @@ void Game::Draw()
 			Crawler* crawler = *crawlerIt;
 			SDL_RenderFillRect(mRenderer, &crawler->GetCollisionRect());
 		}
+		for (auto meteorIt = mMeteors.begin(); meteorIt != mMeteors.end(); ++meteorIt)
+		{
+			Meteor* meteor = *meteorIt;
+			SDL_RenderFillRect(mRenderer, &meteor->GetRect());
+		}
 		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
 		for (auto crawlerIt = mCrawlers.begin(); crawlerIt != mCrawlers.end(); ++crawlerIt)
@@ -744,6 +808,16 @@ void Game::Draw()
         Render(boom->GetRenderable(), &boom->GetRect(), SDL_FLIP_NONE);
     }
 
+	//
+    // draw the meteors
+    //
+    std::list<Meteor*>::iterator metIt = mMeteors.begin();
+    for ( ; metIt != mMeteors.end(); ++metIt)
+	{
+        Meteor* meteor = *metIt;
+        Render(meteor->GetRenderable(), &meteor->GetRect(), SDL_FLIP_NONE);
+    }
+
     // display everything we just drew
     SDL_RenderPresent(mRenderer);
 }
@@ -772,7 +846,14 @@ void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL
 {
     if (renderable)
 	{
-        SDL_RenderCopyEx(mRenderer, 
+        /*SDL_RenderCopyEx(mRenderer,
+                         renderable->GetTexture()->GetPtr(),
+                         renderable->GetRect(),
+                         dstRect,
+                         renderable->GetRotationAngle(),
+                         &renderable->GetRotationOrigin(),
+                         flip);*/
+		SDL_RenderCopyEx(mRenderer, 
 					renderable->GetTexture()->GetPtr(), 
 					renderable->GetRect(), 
 					dstRect, 
@@ -806,7 +887,8 @@ void Game::StopSounds()
 	Mix_HaltChannel(-1);
 }
 
-void Game::LoadScene(int scene)
+// Load the scene with/without the crawlers and coins
+void Game::LoadScene(int scene, bool items)
 {
 	// delete all crawlers and clear the list
     std::list<Crawler*>::iterator crawlerIter = mCrawlers.begin();
@@ -826,6 +908,13 @@ void Game::LoadScene(int scene)
     }
     mCoins.clear();
 
+	// delete all meteors
+    std::list<Meteor*>::iterator metIt = mMeteors.begin();
+    for ( ; metIt != mMeteors.end(); ++metIt) {
+        delete *metIt;
+    }
+    mMeteors.clear();
+
 	delete mBackground;
 	mBackground = NULL;
 
@@ -836,10 +925,10 @@ void Game::LoadScene(int scene)
 	t << "media/" << mScene << ".txt";
 	b << "Background" << mScene + 1;;
 	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str());
-	mGrid = LoadLevel(t.str());
+	mGrid = LoadLevel(t.str(), items);
 
 	// Game over scene
-	if (mScene == 5)
+	if (mScene == 6)
 	{
 		mFlagPole = new Layer(mScrWidth *.8f, mScrHeight *.5f + 20, "FlagPole");
 		//Mix_HaltMusic();

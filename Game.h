@@ -9,6 +9,7 @@
 #include "Robot.h"
 #include "Layer.h"
 #include "Coin.h"
+#include "Meteor.h"
 #include "CrawlerStrong.h"
 #include "CrawlerWeak.h"
 #include <SDL_mixer.h>
@@ -55,6 +56,7 @@ class Game {
 
     GG::Timer               mTimer;
     float                   mTime;          // time elapsed since game started (in seconds)
+	float					mMeteorTime;	// time that the last meteor was created (in seconds)
 
     Grid*                   mGrid;
 
@@ -64,6 +66,7 @@ class Game {
 	Layer*					mBackground;
 	Layer*					mForeground;
 	Layer*					mFlagPole;
+	std::list<Meteor*>		mMeteors;
 	std::list<Crawler*>     mCrawlers;
 	std::list<Coin*>		mCoins;
 	int						mScene;
@@ -83,24 +86,26 @@ public:
 
     void                    Run();
 
-    int                     GetScrWidth() const         { return mScrWidth; }
-    int                     GetScrHeight() const        { return mScrHeight; }
+    int                     GetScrWidth() const				{ return mScrWidth; }
+    int                     GetScrHeight() const			{ return mScrHeight; }
 
-    GG::TextureManager*     GetTextureManager() const   { return mTexMgr; }
+    GG::TextureManager*     GetTextureManager() const		{ return mTexMgr; }
 
-    float                   GetTime() const             { return mTime; }
+    float                   GetTime() const					{ return mTime; }
+	float                   GetMeteorTime() const       { return mMeteorTime; }
 
-    Grid*                   GetGrid() const             { return mGrid; }
-	Robot*					GetRobot() const		    { return mRobot; }
-	int*					GetScene()					{ return &mScene; }
-	Layer*					GetFlagPole() const			{ return mFlagPole; }
+    Grid*                   GetGrid() const					{ return mGrid; }
+	Robot*					GetRobot() const				{ return mRobot; }
+	int*					GetScene()						{ return &mScene; }
+	Layer*					GetFlagPole() const				{ return mFlagPole; }
 
-    bool                    IsKeyDown(SDL_Scancode s)   { return mKeyState[s] != 0; }
+    bool                    IsKeyDown(SDL_Scancode s)		{ return mKeyState[s] != 0; }
 	void					PlaySound(std::string name);
 	void					StopSounds();
-	std::list<Crawler*>*	GetCrawlers()				{ return &mCrawlers; }
-	std::list<Coin*>*		GetCoins()					{ return &mCoins; }
-	void					LoadScene(int scene);
+
+	std::list<Crawler*>*	GetCrawlers()					{ return &mCrawlers; }
+	std::list<Coin*>*		GetCoins()						{ return &mCoins; }
+	void					LoadScene(int scene, bool items);
 	void					LoadTextures();
 	void					LoadSounds();
 

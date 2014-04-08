@@ -243,7 +243,21 @@ void Robot::Update(float dt)
 		}
 		if (mRect.x <= -10)
 		{
-			mRect.x = -10;
+			int *scene = game->GetScene();
+			// If we are still in the first scene,
+			// don't let the robot go back
+			if (!*(scene))
+			{
+				mRect.x = -10;
+			}
+			// Else, let the robot go back to the previous
+			// scene without any crawlers or coins
+			else
+			{
+				mRect.x = game->GetScrWidth() + 10.0 - mRect.w;
+				(*scene)--;
+				game->LoadScene(*scene, false);
+			}
 		}
 		else
 		{
@@ -261,7 +275,7 @@ void Robot::Update(float dt)
 			mRect.x = -10;
 			int *scene = game->GetScene();
 			(*scene)++;
-			game->LoadScene(*scene);
+			game->LoadScene(*scene, true);
 		}
 		else
 		{
@@ -288,6 +302,7 @@ void Robot::Bounce(float velocity, bool killed)
 { 
 	if (killed)
 	{
+		mJumping = 0;
 		mDead = 1;
 	}
 	else
