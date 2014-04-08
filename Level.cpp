@@ -125,8 +125,8 @@ Grid* LoadLevel(const std::string& filename)
 			}
 			case 'c':
 			{
-				//Coin* coin = new Coin(col*tileWidth, (row+1)*tileHeight);
-				//game->GetCoins()->push_back(coin);
+				Coin* coin = new Coin(col*tileWidth, (row+1)*tileHeight);
+				game->GetCoins()->push_back(coin);
 				break;
 			}
 			case '@':

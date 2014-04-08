@@ -16,11 +16,12 @@ Coin::Coin(float x, float y)
 	// create the coin animation
 	mRenderable = new GG::Renderable(tex, .75f, true);
 
-	// center the screen rect at the specified coordinates
-	mRect.x = (int)x - mRenderable->GetWidth() / 2;
-	mRect.y = (int)y - mRenderable->GetHeight() / 2;
+
 	mRect.w = mRenderable->GetWidth();
 	mRect.h = mRenderable->GetHeight();
+	// center the screen rect at the specified coordinates
+	mRect.x = (int)(mPosX);
+	mRect.y = (int)(mPosY - mRect.h);         // y-coord of position is at the bottom of screen rect
 
 }
 

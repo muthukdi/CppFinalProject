@@ -40,6 +40,7 @@ Game::Game()
 	, mBlockSound(NULL)
 	, mGameOverMusic(NULL)
 	, mMusic(NULL)
+	, mCoins(NULL)
 {
 }
 
@@ -473,10 +474,11 @@ void Game::Update(float dt)
 		// disable its controls and play game over animation
 		if (mScene == 5 && !mRobot->GetJumping() && !mRobot->GetFalling())
 		{
-			if (Mix_PlayMusic(mGameOverMusic, -1) == -1)
-			{
-			   printf("Mix_PlayMusic: %s\n", Mix_GetError());
-			}
+			
+			//if (Mix_PlayMusic(mGameOverMusic, -1) == -1)
+			//{
+			//   printf("Mix_PlayMusic: %s\n", Mix_GetError());
+			//}
 			mRobot->SetAutoPilot(true);
 		}
 		mRobot->Update(dt);
@@ -491,10 +493,10 @@ void Game::Update(float dt)
 		if (mRobot->GetCollisonRect().y < coin->GetRect().y + coin->GetRect().h)
 		{
 			if ((mRobot->GetCollisonRect().x < coin->GetRect().x + coin->GetRect().w)
- 				&& (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > coin->GetRect().x))
+				&& (mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w > coin->GetRect().x))
 			{
 				if ((mRobot->GetCollisonRect().y < coin->GetRect().y + coin->GetRect().h)
- 				&& (mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > coin->GetRect().y))
+					&& (mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h > coin->GetRect().y))
 				{
 					//I have found that the sound is delayed...So I start it a bit earlier than the actualy delete of the Coin
 					if (coin->GetSoundDelay() == 0)
@@ -514,6 +516,11 @@ void Game::Update(float dt)
 						coin->SetSoundDelay(1);
 					}
 				}
+				else
+				{
+					coin->Update(dt);
+					++coinIt;
+				}
 			}
 			else
 			{
@@ -521,6 +528,12 @@ void Game::Update(float dt)
 				++coinIt;
 			}
 		}
+		else
+		{
+			coin->Update(dt);
+			++coinIt;
+		}
+			
 	}
 
 	// update all crawlers
@@ -829,6 +842,10 @@ void Game::LoadScene(int scene)
 	if (mScene == 5)
 	{
 		mFlagPole = new Layer(mScrWidth *.8f, mScrHeight *.5f + 20, "FlagPole");
+		//Mix_HaltMusic();
+		//Mix_FreeMusic(mMusic);
+		//mMusic = NULL;
+		Mix_PlayMusic(mGameOverMusic, -1);
 	}
 }
 
