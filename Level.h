@@ -6,6 +6,6 @@
 
 Grid* CreateRandomLevel(const std::string& tileTexName);
 
-Grid* LoadLevel(const std::string& filename);
+Grid* LoadLevel(const std::string& filename, bool items);
 
 #endif

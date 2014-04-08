@@ -50,7 +50,7 @@ Grid* CreateRandomLevel(const std::string& tileTexName)
     return grid;
 }
 
-Grid* LoadLevel(const std::string& filename)
+Grid* LoadLevel(const std::string& filename, bool items)
 {
 	std::fstream f(filename);
 	//f.open(filename);
@@ -111,22 +111,31 @@ Grid* LoadLevel(const std::string& filename)
 				break;
 			case 'w':
 			{
-				Crawler* crawler = new CrawlerWeak(col*tileWidth, (row+1)*tileHeight, true);
-				crawler->SetDirection(GG::RandomSign());
-				game->GetCrawlers()->push_back(crawler);
+				if (items)
+				{
+					Crawler* crawler = new CrawlerWeak(col*tileWidth, (row+1)*tileHeight, true);
+					crawler->SetDirection(GG::RandomSign());
+					game->GetCrawlers()->push_back(crawler);
+				}
 				break;
 			}
 			case 's':
 			{
-				Crawler* crawler = new CrawlerStrong(col*tileWidth, (row+1)*tileHeight, false);
-				crawler->SetDirection(GG::RandomSign());
-				game->GetCrawlers()->push_back(crawler);
+				if (items)
+				{
+					Crawler* crawler = new CrawlerStrong(col*tileWidth, (row+1)*tileHeight, false);
+					crawler->SetDirection(GG::RandomSign());
+					game->GetCrawlers()->push_back(crawler);
+				}
 				break;
 			}
 			case 'c':
 			{
-				//Coin* coin = new Coin(col*tileWidth, (row+1)*tileHeight);
-				//game->GetCoins()->push_back(coin);
+				if (items)
+				{
+					//Coin* coin = new Coin(col*tileWidth, (row+1)*tileHeight);
+					//game->GetCoins()->push_back(coin);
+				}
 				break;
 			}
 			case '@':

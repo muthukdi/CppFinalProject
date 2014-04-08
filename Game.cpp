@@ -228,7 +228,7 @@ bool Game::Initialize()
 	LoadTextures();
 
     // initialize grid from a text file (including crawlers and coins!)
-    LoadScene(mScene);
+    LoadScene(mScene, true);
 
 	// initialize the robot
 	mRobot = new Robot(350.0f, mScrHeight-160.0f-32.0f);
@@ -793,7 +793,8 @@ void Game::StopSounds()
 	Mix_HaltChannel(-1);
 }
 
-void Game::LoadScene(int scene)
+// Load the scene with/without the crawlers and coins
+void Game::LoadScene(int scene, bool items)
 {
 	// delete all crawlers and clear the list
     std::list<Crawler*>::iterator crawlerIter = mCrawlers.begin();
@@ -823,7 +824,7 @@ void Game::LoadScene(int scene)
 	t << "media/" << mScene << ".txt";
 	b << "Background" << mScene + 1;;
 	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str());
-	mGrid = LoadLevel(t.str());
+	mGrid = LoadLevel(t.str(), items);
 
 	// Game over scene
 	if (mScene == 5)
