@@ -39,6 +39,7 @@ Game::Game()
 	, mStompSoundNoKill(NULL)
 	, mDieSound(NULL)
 	, mBlockSound(NULL)
+	, mThudSound(NULL)
 	, mGameOverMusic(NULL)
 	, mMusic(NULL)
 	, mCoins(NULL)
@@ -635,6 +636,7 @@ void Game::Update(float dt)
 		// If the meteor has either reached the ground, destroy it with an explosion
         if (entity->GetRect().y > mScrHeight-32-64) 
 		{
+			Mix_PlayChannel(-1, mThudSound, 0);
 			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
             mExplosions.push_back(boom);
             metIt = mMeteors.erase(metIt); // remove the entry from the list and advance iterator
@@ -647,6 +649,7 @@ void Game::Update(float dt)
 				entity->GetRect().x + entity->GetRect().w > mRobot->GetRect().x + 15 &&
 				entity->GetRect().x < mRobot->GetRect().x + mRobot->GetRect().w - 15 && !mRobot->IsDead())
 		{
+			Mix_PlayChannel(-1, mThudSound, 0);
 			Mix_PlayChannel(-1, mDieSound, 0);
 			mRobot->Bounce(-400, true);             // kill the robot
 			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
@@ -662,9 +665,9 @@ void Game::Update(float dt)
     }
 
 	//
-    // create a new meteor every 1 second in scene 5
+    // create a new meteor every 0.5 seconds in scene 5
     //
-	if (mTime - mMeteorTime > 1.0 && mScene == 5)
+	if (mTime - mMeteorTime > 0.5 && mScene == 5)
 	{
 		int randomX = GG::RandomInt(mScrWidth-64);
 		int randomRotation = GG::RandomInt(90) + 180;
@@ -846,20 +849,13 @@ void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL
 {
     if (renderable)
 	{
-        /*SDL_RenderCopyEx(mRenderer,
+        SDL_RenderCopyEx(mRenderer,
                          renderable->GetTexture()->GetPtr(),
                          renderable->GetRect(),
                          dstRect,
                          renderable->GetRotationAngle(),
                          &renderable->GetRotationOrigin(),
-                         flip);*/
-		SDL_RenderCopyEx(mRenderer, 
-					renderable->GetTexture()->GetPtr(), 
-					renderable->GetRect(), 
-					dstRect, 
-					0.0, 
-					NULL, 
-					flip);
+                         flip);
     }
 	else
 	{
@@ -974,4 +970,5 @@ void Game::LoadSounds()
 	mStompSoundNoKill = Mix_LoadWAV("media/stomp_sound_nokill.wav");
 	mDieSound = Mix_LoadWAV("media/die_sound.wav");
 	mBlockSound = Mix_LoadWAV("media/block_sound.wav");
+	mThudSound = Mix_LoadWAV("media/thud_sound.wav");
 }
