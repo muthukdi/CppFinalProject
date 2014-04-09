@@ -39,6 +39,7 @@ Game::Game()
 	, mStompSoundNoKill(NULL)
 	, mDieSound(NULL)
 	, mBlockSound(NULL)
+	, mThudSound(NULL)
 	, mGameOverMusic(NULL)
 	, mMusic(NULL)
 	, mCoins(NULL)
@@ -233,7 +234,7 @@ bool Game::Initialize()
     LoadScene(mScene, true);
 
 	// initialize the robot
-	mRobot = new Robot(350.0f, mScrHeight-160.0f-32.0f);
+	mRobot = new Robot(35.0f, mScrHeight-160.0f);
 
 	// initialize the foreground
 	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
@@ -413,7 +414,7 @@ void Game::HandleEvent(const SDL_Event& e)
 			if (Mix_PlayingMusic() == 0)
 			{
 				//Play the music
-				if (mScene < 5)
+				if (mScene < 6)
 				{
 					Mix_PlayMusic(mMusic, -1);
 				}
@@ -482,11 +483,6 @@ void Game::Update(float dt)
 		// disable its controls and play game over animation
 		if (mScene == 6 && !mRobot->GetJumping() && !mRobot->GetFalling())
 		{
-			
-			//if (Mix_PlayMusic(mGameOverMusic, -1) == -1)
-			//{
-			//   printf("Mix_PlayMusic: %s\n", Mix_GetError());
-			//}
 			mRobot->SetAutoPilot(true);
 		}
 		mRobot->Update(dt);
@@ -496,7 +492,7 @@ void Game::Update(float dt)
 	std::list<Coin*>::iterator coinIt = mCoins.begin();
 	while (coinIt != mCoins.end())
 	{
-		Coin *coin =   *coinIt;
+		Coin *coin = *coinIt;
 		// Check if the robot collides with the coin
 		if (mRobot->GetCollisonRect().y < coin->GetRect().y + coin->GetRect().h)
 		{
@@ -635,24 +631,25 @@ void Game::Update(float dt)
 		// If the meteor has either reached the ground, destroy it with an explosion
         if (entity->GetRect().y > mScrHeight-32-64) 
 		{
+			Mix_PlayChannel(-1, mThudSound, 0);
 			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
             mExplosions.push_back(boom);
             metIt = mMeteors.erase(metIt); // remove the entry from the list and advance iterator
             delete entity;              // delete the object
         }
-		// If the meteor has hit the robot, destroy it with an explosion and also kill the robot
-		// Note:  I'm not factoring in the height of the meteor to detect collision here because
-		// it just so happens that it's as big as the white space above the robot's head!
-		else if (entity->GetRect().y > mRobot->GetRect().y &&
-				entity->GetRect().x + entity->GetRect().w > mRobot->GetRect().x + 15 &&
-				entity->GetRect().x < mRobot->GetRect().x + mRobot->GetRect().w - 15 && !mRobot->IsDead())
+		// If the meteor has hit the robot from the top, destroy it with an explosion and also kill the robot
+		else if (entity->GetRect().y + entity->GetRect().h > mRobot->GetCollisonRect().y &&
+				entity->GetRect().y < mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h &&
+				entity->GetRect().x + entity->GetRect().w > mRobot->GetCollisonRect().x &&
+				entity->GetRect().x < mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w && !mRobot->IsDead())
 		{
+			Mix_PlayChannel(-1, mThudSound, 0);
 			Mix_PlayChannel(-1, mDieSound, 0);
 			mRobot->Bounce(-400, true);             // kill the robot
 			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
-            mExplosions.push_back(boom);
-            metIt = mMeteors.erase(metIt); // remove the entry from the list and advance iterator
-            delete entity;              // delete the object
+			mExplosions.push_back(boom);
+			metIt = mMeteors.erase(metIt); // remove the entry from the list and advance iterator
+			delete entity;              // delete the object
 		}
 		else
 		{
@@ -662,9 +659,9 @@ void Game::Update(float dt)
     }
 
 	//
-    // create a new meteor every 1 second in scene 5
+    // create a new meteor every 0.5 seconds in scene 5
     //
-	if (mTime - mMeteorTime > 1.0 && mScene == 5)
+	if (mTime - mMeteorTime > 0.5 && mScene == 5)
 	{
 		int randomX = GG::RandomInt(mScrWidth-64);
 		int randomRotation = GG::RandomInt(90) + 180;
@@ -846,20 +843,13 @@ void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL
 {
     if (renderable)
 	{
-        /*SDL_RenderCopyEx(mRenderer,
+        SDL_RenderCopyEx(mRenderer,
                          renderable->GetTexture()->GetPtr(),
                          renderable->GetRect(),
                          dstRect,
                          renderable->GetRotationAngle(),
                          &renderable->GetRotationOrigin(),
-                         flip);*/
-		SDL_RenderCopyEx(mRenderer, 
-					renderable->GetTexture()->GetPtr(), 
-					renderable->GetRect(), 
-					dstRect, 
-					0.0, 
-					NULL, 
-					flip);
+                         flip);
     }
 	else
 	{
@@ -931,10 +921,7 @@ void Game::LoadScene(int scene, bool items)
 	if (mScene == 6)
 	{
 		mFlagPole = new Layer(mScrWidth *.8f, mScrHeight *.5f + 20, "FlagPole");
-		//Mix_HaltMusic();
-		//Mix_FreeMusic(mMusic);
-		//mMusic = NULL;
-		Mix_PlayMusic(mGameOverMusic, -1);
+		Mix_PlayMusic(mGameOverMusic, 0);
 	}
 }
 
@@ -946,6 +933,7 @@ void Game::LoadTextures()
 	mTexMgr->LoadTexture("Background4", "Layer4.png");
 	mTexMgr->LoadTexture("Background5", "Layer5.png");
 	mTexMgr->LoadTexture("Background6", "Layer6.png");
+	mTexMgr->LoadTexture("Background7", "Layer7.png");
 	mTexMgr->LoadTexture("Foreground", "Layer0.png");
     mTexMgr->LoadTexture("Tiles", "tiles.tga", 7);
 	mTexMgr->LoadTexture("Tiles2", "tiles2.tga", 7);
@@ -974,4 +962,5 @@ void Game::LoadSounds()
 	mStompSoundNoKill = Mix_LoadWAV("media/stomp_sound_nokill.wav");
 	mDieSound = Mix_LoadWAV("media/die_sound.wav");
 	mBlockSound = Mix_LoadWAV("media/block_sound.wav");
+	mThudSound = Mix_LoadWAV("media/thud_sound.wav");
 }

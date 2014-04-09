@@ -72,12 +72,14 @@ class Game {
 	int						mScene;
 
 	bool					rectVisible;
+
 	Mix_Chunk*				mCoinSound;
 	Mix_Chunk*				mJumpSound;
 	Mix_Chunk*				mStompSound;
 	Mix_Chunk*				mStompSoundNoKill;
 	Mix_Chunk*				mDieSound;
 	Mix_Chunk*				mBlockSound;
+	Mix_Chunk*				mThudSound;
 	Mix_Music*				mMusic;
 	Mix_Music*				mGameOverMusic;
 

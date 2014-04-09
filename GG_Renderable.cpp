@@ -21,6 +21,8 @@ Renderable::Renderable(const Texture* tex)
     , mLoopable(false)
     , mTime(0.0f)
     , mFrameRect()
+	, mRotAngle(0.0)
+	, mRotOrigin()
 {
     // set the frame rect to cover the entire texture
     if (tex) {
@@ -28,6 +30,9 @@ Renderable::Renderable(const Texture* tex)
         mFrameRect.y = 0;
         mFrameRect.w = tex->GetWidth();
         mFrameRect.h = tex->GetHeight();
+		// set rotation origin to rect centroid by default
+        mRotOrigin.x = mFrameRect.w / 2;
+        mRotOrigin.y = mFrameRect.h / 2;
     }
 }
 
@@ -48,6 +53,8 @@ Renderable::Renderable(const Texture* tex, int cellNo)
     , mLoopable(false)
     , mTime(0.0f)
     , mFrameRect()
+	, mRotAngle(0.0)
+    , mRotOrigin()
 {
     // set the frame rect to the specified cell
     if (tex) {
@@ -55,6 +62,9 @@ Renderable::Renderable(const Texture* tex, int cellNo)
         mFrameRect.y = 0;
         mFrameRect.w = tex->GetCellWidth();
         mFrameRect.h = tex->GetCellHeight();
+		// set rotation origin to rect centroid by default
+        mRotOrigin.x = mFrameRect.w / 2;
+        mRotOrigin.y = mFrameRect.h / 2;
     }
 }
 
@@ -75,6 +85,8 @@ Renderable::Renderable(const Texture* tex, float duration, bool loopable)
     , mLoopable(loopable)
     , mTime(0.0f)
     , mFrameRect()
+	, mRotAngle(0.0)
+    , mRotOrigin()
 {
     // set the frame rect to be the first cell in the texture
     if (tex) {
@@ -82,6 +94,9 @@ Renderable::Renderable(const Texture* tex, float duration, bool loopable)
         mFrameRect.y = 0;
         mFrameRect.w = tex->GetCellWidth();
         mFrameRect.h = tex->GetCellHeight();
+		// set rotation origin to rect centroid by default
+        mRotOrigin.x = mFrameRect.w / 2;
+        mRotOrigin.y = mFrameRect.h / 2;
     }
 }
 
