@@ -23,6 +23,7 @@ Robot::Robot(float x, float y)
 	, mFalling(0)
 	, mDead(0)
 	, mAutoPilot(0)
+	, mJumpDisabled(0)
 	, mVelocityY(-850.0f)
 {
 	Game* game = Game::GetInstance();
@@ -86,9 +87,9 @@ void Robot::Update(float dt)
 
 	// This means that the robot's controls have been disabled and the
 	// computer is trying to play the game over animation
-	if (mAutoPilot == 1)
+	if (mAutoPilot)
 	{
-		if (mDirection == 1)
+		if (mDirection)
 		{
 			mDirection = 0;
 		}
@@ -107,7 +108,7 @@ void Robot::Update(float dt)
 
 	// Kill the robot with a bounce!  If the robot is dead, it's not allowed to do 
 	// anything else until it's brought back to life by using the "R" key (resurrect)
-	if (mDead == 1)
+	if (mDead)
 	{
 		if (mRenderable != mRenderableDie)
 		{
@@ -157,18 +158,64 @@ void Robot::Update(float dt)
 	}
 	else if (game->IsKeyDown(SDL_SCANCODE_SPACE))
 	{
-		if (mJumping == 0 )
+		if (!mJumpDisabled)
 		{
-			game->PlaySound("Jump");
-			mJumping = 1;
-			mRenderableJump->Rewind();
-			mRenderable = mRenderableJump;
+			mJumpDisabled = true;
+			if (mJumping == 0 )
+			{
+				game->PlaySound("Jump");
+				mJumping = 1;
+				mRenderableJump->Rewind();
+				mRenderable = mRenderableJump;
+			}
+		}
+		else if (game->IsKeyDown(SDL_SCANCODE_A) || game->IsKeyDown(SDL_SCANCODE_D))
+		{
+			//Now we check if he is jumping
+			if (mJumping)
+			{			
+				//If not jumping anymore change the renderable
+				if (!mRenderable->IsAnimating())
+				{
+					mRenderable = mRenderableRun;
+				}
+			}
+			else
+			{
+				//Else, if the renderable is not Run then set it to run
+				if (mRenderable != mRenderableRun)
+				{
+					mRenderable = mRenderableRun;
+				}
+			}
+		}
+		else
+		{
+			// If the robot stops now after running 
+			//Now we check if he is jumpiing
+			if (mJumping)
+			{
+				//If not jumping anymore change the renderable
+				if (!mRenderable->IsAnimating())
+				{
+					mRenderable = mRenderableIdle;
+				}
+			}
+			//Else, if the renderable is not Idle then set it to idle
+			else
+			{
+				if (mRenderable != mRenderableIdle)
+				{
+					mRenderable = mRenderableIdle;
+				}
+			}
 		}
 	}
 	else if (game->IsKeyDown(SDL_SCANCODE_A) || game->IsKeyDown(SDL_SCANCODE_D))
 	{
-		//Now we check if he is jumpiing
-		if (mJumping == 1)
+		mJumpDisabled = false;
+		//Now we check if he is jumping
+		if (mJumping)
 		{			
 			//If not jumping anymore change the renderable
 			if (!mRenderable->IsAnimating())
@@ -187,9 +234,10 @@ void Robot::Update(float dt)
 	}
 	else
 	{
+		mJumpDisabled = false;
 		// If the robot stops now after running 
 		//Now we check if he is jumpiing
-		if (mJumping == 1)
+		if (mJumping)
 		{
 			//If not jumping anymore change the renderable
 			if (!mRenderable->IsAnimating())
@@ -207,7 +255,7 @@ void Robot::Update(float dt)
 		}
 	}
 	//Jumping with gravity
-	if (mJumping == 1)
+	if (mJumping)
 	{
  		mVelocityY += GRAVITY * dt;
 		mRect.y += (int)(dt * mVelocityY);
@@ -237,7 +285,7 @@ void Robot::Update(float dt)
 	// Change the robot's horizontal position based on key input
     if (game->IsKeyDown(SDL_SCANCODE_A)) 
 	{
-		if (mDirection == 0)
+		if (!mDirection)
 		{
 			mDirection = 1;
 		}
@@ -266,7 +314,7 @@ void Robot::Update(float dt)
     }
     if (game->IsKeyDown(SDL_SCANCODE_D))
 	{
-		if (mDirection == 1)
+		if (mDirection)
 		{
 			mDirection = 0;
 		}
@@ -315,7 +363,7 @@ void Robot::Bounce(float velocity, bool killed)
 
 void Robot::SetCollisionRect()
 {
-	if (mDirection == 0)
+	if (!mDirection)
 	{
 		mCollisionRect.x = mRect.x + mRect.w / 4 -5;
 		mCollisionRect.w = mRect.w / 2;

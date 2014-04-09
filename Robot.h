@@ -25,6 +25,8 @@ protected:
 	bool					mFalling; // (1 for falling and 0 for not falling)
 	bool					mDead; // (1 for dead and 0 for not dead)
 	bool					mAutoPilot; // The game will control the robot!
+
+	bool					mJumpDisabled; // Guards against jumping repeatedly by holding down SPACE!
 	float					mVelocityY;
 	static const float		GRAVITY;
 
