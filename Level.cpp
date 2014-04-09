@@ -71,7 +71,7 @@ Grid* LoadLevel(const std::string& filename, bool items)
 	// Just outputs the file contents (for debugging)
 	for (unsigned i = 0; i < lines.size(); i++)
 	{
-		std::cout << lines[i] << std::endl;
+		//std::cout << lines[i] << std::endl;
 	}
 
 	unsigned numRows = lines.size();

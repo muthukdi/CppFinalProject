@@ -143,9 +143,17 @@ Game::Initialize
 */
 bool Game::Initialize()
 {
-
+	// Instructions:
     std::cout << "***" << std::endl;
-    std::cout << "*** Click to make boom!" << std::endl;
+    std::cout << "*** Press A and D to move left and right" << std::endl;
+	std::cout << "*** Press SPACE to jump" << std::endl;
+	std::cout << "*** Press K to remove all the crawlers from a scene!" << std::endl;
+	std::cout << "*** Press P to pause/unpause the game" << std::endl;
+	std::cout << "*** Press V to show/hide the collision rectangles" << std::endl;
+	std::cout << "*** Press 9 to stop/play background music" << std::endl;
+	std::cout << "*** Press X to add a strong crawler on the ground tiles" << std::endl;
+	std::cout << "*** Press C to add a weak crawler on the ground tiles" << std::endl;
+	std::cout << "*** Press R to resurrect from death" << std::endl;
     std::cout << "***" << std::endl;
 
     // initialize SDL
