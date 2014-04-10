@@ -443,9 +443,15 @@ TextureManager::LoadTexture
 */
 Texture* TextureManager::LoadTexture(const std::string& name, const char* text, SDL_Color text_color)
 {
+	// first, check if the name already exists in our lookup table
+    if (mTextures.find(name) != mTextures.end())
+	{
+        std::cerr << "*** Texture with name '" << name << "' already exists" << std::endl;
+        return NULL;
+    }
 	// Load the font
 	TTF_Font *font;
-	font = TTF_OpenFont("FreeSans.ttf", 20);
+	font = TTF_OpenFont("fonts/FreeSerifBold.ttf", 24);
 	if (font == NULL)
 	{
 		std::cerr << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;

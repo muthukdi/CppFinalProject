@@ -749,15 +749,11 @@ void Game::Draw()
 	// Draw the collision rectangles
 	if (rectVisible)
 	{
-		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
 		SDL_RenderFillRect(mRenderer, &mRobot->GetBottomTileRect());
-		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 150, 0, 0, 255);
 		SDL_RenderFillRect(mRenderer, &mRobot->GetTopTileRect());
-		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
-		// draw the player sprite using the selected color
 		SDL_RenderFillRect(mRenderer, &mRobot->GetCollisonRect());
 		for (auto coinIt = mCoins.begin(); coinIt != mCoins.end(); ++coinIt)
 		{
@@ -774,7 +770,6 @@ void Game::Draw()
 			Meteor* meteor = *meteorIt;
 			SDL_RenderFillRect(mRenderer, &meteor->GetRect());
 		}
-		// set new color for drawing
 		SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
 		for (auto crawlerIt = mCrawlers.begin(); crawlerIt != mCrawlers.end(); ++crawlerIt)
 		{
@@ -782,6 +777,7 @@ void Game::Draw()
 			SDL_RenderFillRect(mRenderer, &crawler->GetTileRect());
 		}
 	}
+
 	//
     // draw the robot
     //
