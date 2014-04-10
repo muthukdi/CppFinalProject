@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Coin.cpp" />
+    <ClCompile Include="CrawlerStrong.cpp" />
+    <ClCompile Include="CrawlerWeak.cpp" />
+    <ClCompile Include="Meteor.cpp" />
+    <ClCompile Include="Robot.cpp" />
+    <ClCompile Include="Crawler.cpp" />
+    <ClCompile Include="Explosion.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="Layer.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="GG_Common.cpp">
+      <Filter>GG</Filter>
+    </ClCompile>
+    <ClCompile Include="GG_Graphics.cpp">
+      <Filter>GG</Filter>
+    </ClCompile>
+    <ClCompile Include="GG_Renderable.cpp">
+      <Filter>GG</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Coin.h" />
+    <ClInclude Include="CrawlerStrong.h" />
+    <ClInclude Include="CrawlerWeak.h" />
+    <ClInclude Include="Crawler.h" />
+    <ClInclude Include="Meteor.h" />
+    <ClInclude Include="Robot.h" />
+    <ClInclude Include="Explosion.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="Layer.h" />
+    <ClInclude Include="Grid.h" />
+    <ClInclude Include="GG_Common.h">
+      <Filter>GG</Filter>
+    </ClInclude>
+    <ClInclude Include="GG_Graphics.h">
+      <Filter>GG</Filter>
+    </ClInclude>
+    <ClInclude Include="GG_Renderable.h">
+      <Filter>GG</Filter>
+    </ClInclude>
+    <ClInclude Include="GG_Timer.h">
+      <Filter>GG</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="GG">
+      <UniqueIdentifier>{edf011cc-5af0-4a0d-976d-5d4a5d915ca4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
