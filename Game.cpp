@@ -1,8 +1,6 @@
 #include "Game.h"
 #include "Level.h"
 
-#include <SDL_image.h>
-
 #include <iostream>
 #include <sstream>
 
@@ -43,6 +41,10 @@ Game::Game()
 	, mGameOverMusic(NULL)
 	, mMusic(NULL)
 	, mCoins(NULL)
+	, mBackground(NULL)
+	, mForeground(NULL)
+	, mFlagPole(NULL)
+	, mPointsLabel(NULL)
 {
 }
 
@@ -163,7 +165,6 @@ bool Game::Initialize()
         return false;
     }
 
-
     // initialize SDL_image add-on
     if (!IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG))
 	{
@@ -203,6 +204,14 @@ bool Game::Initialize()
         std::cerr << "*** Failed to initialize texture manager" << std::endl;
         return false;
     }
+
+	// Initialize SDL_ttf library
+	if (TTF_Init() != 0)
+	{
+		std::cerr << "TTF_Init() Failed: " << TTF_GetError() << std::endl;
+		SDL_Quit();
+		exit(1);
+	}
 
 	//Initialize SDL Audio
 	if (SDL_INIT_AUDIO < 0)
@@ -246,6 +255,9 @@ bool Game::Initialize()
 
 	// initialize the foreground
 	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
+
+	// initialize the points label
+	mPointsLabel = new Layer(mScrWidth * .5f, mScrHeight * .5f, "PointsLabel");
 
 	// Play the background music
 	Mix_PlayMusic(mMusic, -1);
@@ -337,7 +349,8 @@ void Game::Shutdown()
 	delete mForeground;
 	mForeground = NULL;
 
-
+	// Shutdown the TTF library
+	TTF_Quit();
 
     // unload the image libraries
     IMG_Quit();
@@ -823,6 +836,11 @@ void Game::Draw()
         Render(meteor->GetRenderable(), &meteor->GetRect(), SDL_FLIP_NONE);
     }
 
+	if (mPointsLabel)
+	{
+		Render(mPointsLabel->GetRenderable(), &mPointsLabel->GetRect(), SDL_FLIP_NONE);
+	}
+
     // display everything we just drew
     SDL_RenderPresent(mRenderer);
 }
@@ -960,6 +978,9 @@ void Game::LoadTextures()
 	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
 	mTexMgr->LoadTexture("Coin", "coin.png", 10);
 	mTexMgr->LoadTexture("FlagPole", "flagpole.png");
+
+	SDL_Color text_color = {255, 255, 255};
+	mTexMgr->LoadTexture("PointsLabel", "This is a Demo!", text_color);
 }
 
 void Game::LoadSounds()

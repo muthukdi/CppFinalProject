@@ -2,6 +2,7 @@
 
 #include <SDL_image.h>
 #include <iostream>
+#include <SDL_ttf.h>
 
 namespace GG {
 
@@ -427,6 +428,53 @@ Texture* TextureManager::LoadTexture(const std::string& name, const Image& img, 
         // invalid image, fail
         return NULL;
     }
+}
+
+/*
+================================================================================
+
+TextureManager::LoadTexture
+
+    Loads a texture that represents a label specified by a string
+
+    Refer to the overload of this method for other details.
+
+================================================================================
+*/
+Texture* TextureManager::LoadTexture(const std::string& name, const char* text, SDL_Color text_color)
+{
+	// Load the font
+	TTF_Font *font;
+	font = TTF_OpenFont("FreeSans.ttf", 20);
+	if (font == NULL)
+	{
+		std::cerr << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
+		return NULL;
+	}
+	// Write the given text to a surface
+	SDL_Surface *textSurface;
+	textSurface = TTF_RenderText_Solid(font, text, text_color);
+
+	if (textSurface == NULL)
+	{
+		std::cerr << "TTF_RenderText_Solid() Failed: " << TTF_GetError() << std::endl;
+		return NULL;
+	}
+
+	// Convert the surface into an SDL texture
+	SDL_Texture* tex = SDL_CreateTextureFromSurface(mRenderer, textSurface);
+    if (!tex) {
+        std::cerr << "*** Failed to create texture '" << name << "': " << SDL_GetError() << std::endl;
+        return NULL;
+    }
+
+    // create a new Texture object
+    Texture* texObj = new Texture(name, tex, 1);
+
+    // add it to our lookup table
+    mTextures[name] = texObj;
+
+    return texObj;
 }
 
 /*

@@ -12,7 +12,10 @@
 #include "Meteor.h"
 #include "CrawlerStrong.h"
 #include "CrawlerWeak.h"
+
 #include <SDL_mixer.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #include <list>
 
@@ -66,6 +69,7 @@ class Game {
 	Layer*					mBackground;
 	Layer*					mForeground;
 	Layer*					mFlagPole;
+	Layer*					mPointsLabel;
 	std::list<Meteor*>		mMeteors;
 	std::list<Crawler*>     mCrawlers;
 	std::list<Coin*>		mCoins;

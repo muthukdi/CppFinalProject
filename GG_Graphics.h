@@ -189,6 +189,7 @@ public:
 
     Texture*                LoadTexture(const std::string& name, const std::string& filename, int numCells = 1);
     Texture*                LoadTexture(const std::string& name, const Image& img, int numCells = 1);
+	Texture*				LoadTexture(const std::string& name, const char* text, SDL_Color text_color);
 
     Texture*                GetTexture(const std::string& name) const;
 
