@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <string>
 #include <map>
+#include <SDL_ttf.h>
 
 namespace GG {
 
@@ -178,6 +179,7 @@ class TextureManager {
     std::map<std::string, Texture*> mTextures;
 
     Texture*                mDefaultTex;
+	TTF_Font*				font;
 
     Texture*                CreateDefaultTexture();
 

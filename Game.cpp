@@ -197,14 +197,6 @@ bool Game::Initialize()
     // get a pointer to keyboard state managed by SDL
     mKeyState = SDL_GetKeyboardState(NULL);
 
-    // create a texture manager
-    mTexMgr = new GG::TextureManager;
-    if (!mTexMgr->Initialize(mRenderer, "media/"))
-	{
-        std::cerr << "*** Failed to initialize texture manager" << std::endl;
-        return false;
-    }
-
 	// Initialize SDL_ttf library
 	if (TTF_Init() != 0)
 	{
@@ -212,6 +204,14 @@ bool Game::Initialize()
 		SDL_Quit();
 		exit(1);
 	}
+
+    // create a texture manager
+    mTexMgr = new GG::TextureManager;
+    if (!mTexMgr->Initialize(mRenderer, "media/"))
+	{
+        std::cerr << "*** Failed to initialize texture manager" << std::endl;
+        return false;
+    }
 
 	//Initialize SDL Audio
 	if (SDL_INIT_AUDIO < 0)
@@ -692,6 +692,15 @@ void Game::Update(float dt)
 		// timestamp this meteor!
 		mMeteorTime = mTime;
 	}
+
+	// Update the points label
+	mTexMgr->DeleteTexture("PointsLabel");
+	std::stringstream newLabel;
+	newLabel << "The game has been running for " << mTime << " seconds!";
+	SDL_Color text_color = {255, 255, 255};
+	mTexMgr->LoadTexture("PointsLabel", newLabel.str().c_str(), text_color);
+	delete mPointsLabel;
+	mPointsLabel = new Layer(mScrWidth * .5f, mScrHeight * .5f, "PointsLabel");
 }
 
 /*
@@ -709,7 +718,7 @@ void Game::Draw()
     SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mRenderer);
 	
-	if (mBackground)
+	/*if (mBackground)
 	{
 		Render(mBackground->GetRenderable(), &mBackground->GetRect(), SDL_FLIP_NONE);
 	}
@@ -830,7 +839,7 @@ void Game::Draw()
 	{
         Meteor* meteor = *metIt;
         Render(meteor->GetRenderable(), &meteor->GetRect(), SDL_FLIP_NONE);
-    }
+    }*/
 
 	if (mPointsLabel)
 	{
@@ -935,7 +944,7 @@ void Game::LoadScene(int scene, bool items)
 
 	std::stringstream b, t;
 	t << "media/" << mScene << ".txt";
-	b << "Background" << mScene + 1;;
+	b << "Background" << mScene + 1;
 	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str());
 	mGrid = LoadLevel(t.str(), items);
 
@@ -976,7 +985,7 @@ void Game::LoadTextures()
 	mTexMgr->LoadTexture("FlagPole", "flagpole.png");
 
 	SDL_Color text_color = {255, 255, 255};
-	mTexMgr->LoadTexture("PointsLabel", "This is a Demo!", text_color);
+	mTexMgr->LoadTexture("PointsLabel", "The game has been running for ", text_color);
 }
 
 void Game::LoadSounds()

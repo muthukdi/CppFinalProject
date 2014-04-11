@@ -2,7 +2,6 @@
 
 #include <SDL_image.h>
 #include <iostream>
-#include <SDL_ttf.h>
 
 namespace GG {
 
@@ -267,6 +266,14 @@ bool TextureManager::Initialize(SDL_Renderer* renderer, const std::string& rootD
         }
     }
 
+	// Load the font
+	font = TTF_OpenFont("fonts/FreeSerifBold.ttf", 24);
+	if (font == NULL)
+	{
+		std::cerr << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
+		return NULL;
+	}
+
     if (mDefaultTex) {
         DeleteTexture(mDefaultTex);
     }
@@ -449,14 +456,7 @@ Texture* TextureManager::LoadTexture(const std::string& name, const char* text, 
         std::cerr << "*** Texture with name '" << name << "' already exists" << std::endl;
         return NULL;
     }
-	// Load the font
-	TTF_Font *font;
-	font = TTF_OpenFont("fonts/FreeSerifBold.ttf", 24);
-	if (font == NULL)
-	{
-		std::cerr << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
-		return NULL;
-	}
+	
 	// Write the given text to a surface
 	SDL_Surface *textSurface;
 	textSurface = TTF_RenderText_Solid(font, text, text_color);
