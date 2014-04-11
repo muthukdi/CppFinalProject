@@ -718,7 +718,7 @@ void Game::Draw()
     SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mRenderer);
 	
-	/*if (mBackground)
+	if (mBackground)
 	{
 		Render(mBackground->GetRenderable(), &mBackground->GetRect(), SDL_FLIP_NONE);
 	}
@@ -839,7 +839,7 @@ void Game::Draw()
 	{
         Meteor* meteor = *metIt;
         Render(meteor->GetRenderable(), &meteor->GetRect(), SDL_FLIP_NONE);
-    }*/
+    }
 
 	if (mPointsLabel)
 	{
