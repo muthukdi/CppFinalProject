@@ -22,6 +22,7 @@
     <ClCompile Include="GG_Renderable.cpp">
       <Filter>GG</Filter>
     </ClCompile>
+    <ClCompile Include="Label.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Coin.h" />
@@ -47,6 +48,7 @@
     <ClInclude Include="GG_Timer.h">
       <Filter>GG</Filter>
     </ClInclude>
+    <ClInclude Include="Label.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GG">

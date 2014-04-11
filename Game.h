@@ -8,6 +8,7 @@
 #include "Crawler.h"
 #include "Robot.h"
 #include "Layer.h"
+#include "Label.h"
 #include "Coin.h"
 #include "Meteor.h"
 #include "CrawlerStrong.h"
@@ -69,7 +70,8 @@ class Game {
 	Layer*					mBackground;
 	Layer*					mForeground;
 	Layer*					mFlagPole;
-	Layer*					mPointsLabel;
+	Label*					mPointsLabel;
+	Label*					mLivesLabel;
 	std::list<Meteor*>		mMeteors;
 	std::list<Crawler*>     mCrawlers;
 	std::list<Coin*>		mCoins;
@@ -86,6 +88,9 @@ class Game {
 	Mix_Chunk*				mThudSound;
 	Mix_Music*				mMusic;
 	Mix_Music*				mGameOverMusic;
+
+	int						mLives;
+	int						mPoints;
 
 public:
     static Game*            GetInstance();

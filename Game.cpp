@@ -45,6 +45,9 @@ Game::Game()
 	, mForeground(NULL)
 	, mFlagPole(NULL)
 	, mPointsLabel(NULL)
+	, mLivesLabel(NULL)
+	, mLives(5)
+	, mPoints(0)
 {
 }
 
@@ -156,6 +159,10 @@ bool Game::Initialize()
 	std::cout << "*** Press X to add a strong crawler on the ground tiles" << std::endl;
 	std::cout << "*** Press C to add a weak crawler on the ground tiles" << std::endl;
 	std::cout << "*** Press R to resurrect from death" << std::endl;
+	std::cout << "*** Each coin is worth 5 points" << std::endl;
+	std::cout << "*** Each weak crawler is worth 25 points" << std::endl;
+	std::cout << "*** Each strong crawler is worth 50 points (2 x 25)" << std::endl;
+	std::cout << "*** You have a total of 5 lives to begin with" << std::endl;
     std::cout << "***" << std::endl;
 
     // initialize SDL
@@ -255,9 +262,6 @@ bool Game::Initialize()
 
 	// initialize the foreground
 	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
-
-	// initialize the points label
-	mPointsLabel = new Layer(mScrWidth * .5f, mScrHeight * .5f, "PointsLabel");
 
 	// Play the background music
 	Mix_PlayMusic(mMusic, -1);
@@ -526,6 +530,8 @@ void Game::Update(float dt)
 					//I have found that the sound is delayed...So I start it a bit earlier than the actualy delete of the Coin
 					if (coin->GetSoundDelay() == 0)
 					{
+						// You get 5 points!
+						mPoints += 5;
 						Mix_PlayChannel(-1, mCoinSound, 0);
 						coin->SetSoundDelay(1);
 					}
@@ -585,6 +591,8 @@ void Game::Update(float dt)
 					{
 						if (crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
 						{
+							// You get 25 points!
+							mPoints += 25;
 							if (crawler->IsJumpedOn())
 							{
 								Mix_PlayChannel(-1, mStompSound, 0);
@@ -610,6 +618,8 @@ void Game::Update(float dt)
 				{
 					if (!mRobot->IsDead() && mRobot->GetVerticalVelocity() == -850.0f && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
 					{
+						// You lose a life:(
+						mLives--;
 						Mix_PlayChannel(-1, mDieSound, 0);
 						mRobot->Bounce(-400, true);             // kill the robot
 					}
@@ -696,11 +706,22 @@ void Game::Update(float dt)
 	// Update the points label
 	mTexMgr->DeleteTexture("PointsLabel");
 	std::stringstream newLabel;
-	newLabel << "The game has been running for " << mTime << " seconds!";
-	SDL_Color text_color = {255, 255, 255};
+	newLabel << "Points = " << mPoints;
+	SDL_Color text_color = {0, 0, 0};
 	mTexMgr->LoadTexture("PointsLabel", newLabel.str().c_str(), text_color);
 	delete mPointsLabel;
-	mPointsLabel = new Layer(mScrWidth * .5f, mScrHeight * .5f, "PointsLabel");
+	mPointsLabel = new Label(10.0f, -5.0f, "PointsLabel");
+
+	// Update the lives label
+	mTexMgr->DeleteTexture("LivesLabel");
+	newLabel.str(std::string());
+	newLabel << "Lives = " << mLives;
+	text_color.r = 255;
+	text_color.g = 50;
+	text_color.b = 50;
+	mTexMgr->LoadTexture("LivesLabel", newLabel.str().c_str(), text_color);
+	delete mLivesLabel;
+	mLivesLabel = new Label(170.0f, -5.0f, "LivesLabel");
 }
 
 /*
@@ -841,9 +862,16 @@ void Game::Draw()
         Render(meteor->GetRenderable(), &meteor->GetRect(), SDL_FLIP_NONE);
     }
 
+	// Draw the points label
 	if (mPointsLabel)
 	{
 		Render(mPointsLabel->GetRenderable(), &mPointsLabel->GetRect(), SDL_FLIP_NONE);
+	}
+
+	// Draw the lives label
+	if (mLivesLabel)
+	{
+		Render(mLivesLabel->GetRenderable(), &mLivesLabel->GetRect(), SDL_FLIP_NONE);
 	}
 
     // display everything we just drew
@@ -983,9 +1011,6 @@ void Game::LoadTextures()
 	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
 	mTexMgr->LoadTexture("Coin", "coin.png", 10);
 	mTexMgr->LoadTexture("FlagPole", "flagpole.png");
-
-	SDL_Color text_color = {255, 255, 255};
-	mTexMgr->LoadTexture("PointsLabel", "The game has been running for ", text_color);
 }
 
 void Game::LoadSounds()

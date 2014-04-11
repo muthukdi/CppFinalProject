@@ -267,7 +267,7 @@ bool TextureManager::Initialize(SDL_Renderer* renderer, const std::string& rootD
     }
 
 	// Load the font
-	font = TTF_OpenFont("fonts/FreeSerifBold.ttf", 24);
+	font = TTF_OpenFont("fonts/FreeSerifBold.ttf", 25);
 	if (font == NULL)
 	{
 		std::cerr << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
