@@ -721,7 +721,7 @@ void Game::Update(float dt)
 	text_color.b = 50;
 	mTexMgr->LoadTexture("LivesLabel", newLabel.str().c_str(), text_color);
 	delete mLivesLabel;
-	mLivesLabel = new Label(170.0f, -5.0f, "LivesLabel");
+	mLivesLabel = new Label(140.0f, -5.0f, "LivesLabel");
 }
 
 /*

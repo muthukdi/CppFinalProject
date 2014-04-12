@@ -267,7 +267,7 @@ bool TextureManager::Initialize(SDL_Renderer* renderer, const std::string& rootD
     }
 
 	// Load the font
-	font = TTF_OpenFont("fonts/FreeSerifBold.ttf", 25);
+	font = TTF_OpenFont("fonts/FreeSerifBold.ttf", 20);
 	if (font == NULL)
 	{
 		std::cerr << "TTF_OpenFont() Failed: " << TTF_GetError() << std::endl;
@@ -442,7 +442,7 @@ Texture* TextureManager::LoadTexture(const std::string& name, const Image& img, 
 
 TextureManager::LoadTexture
 
-    Loads a texture that represents a label specified by a string
+    Loads a texture that represents a text label specified by a string
 
     Refer to the overload of this method for other details.
 
@@ -459,7 +459,9 @@ Texture* TextureManager::LoadTexture(const std::string& name, const char* text, 
 	
 	// Write the given text to a surface
 	SDL_Surface *textSurface;
-	textSurface = TTF_RenderText_Solid(font, text, text_color);
+
+	// Use Blended instead of Solid for anti-aliasing
+	textSurface = TTF_RenderText_Blended(font, text, text_color);
 
 	if (textSurface == NULL)
 	{
