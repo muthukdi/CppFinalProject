@@ -416,6 +416,8 @@ Texture* TextureManager::LoadTexture(const std::string& name, const Image& img, 
         }
 
         SDL_Surface* surf = img.GetSurface();
+		//::cout << "\n" << name << "\n" << std::endl;
+		//Grayscale(surf);
 
         SDL_Texture* tex = SDL_CreateTextureFromSurface(mRenderer, surf);
         if (!tex) {
@@ -590,6 +592,42 @@ void TextureManager::DeleteAll()
 
     // clear the lookup table
     mTextures.clear();
+}
+
+/*
+================================================================================
+
+TextureManager::Grayscale
+
+    This method will iterate through each of the pixels in the image surface and 
+	set all of its color components (r, g, b, a) to the average value of these
+	components.  This should effectively convert the image into grayscale.
+
+================================================================================
+*/
+int TextureManager::Grayscale(SDL_Surface *image)
+{
+	//If the surface must be locked
+    if( SDL_MUSTLOCK( image ) )
+    {
+		//Lock the surface
+        SDL_LockSurface( image );
+    }
+	unsigned bytes = image->w * image->h * 4;
+	//Convert the pixels to 8 bit
+    Uint8 *pixels = (Uint8 *)image->pixels;
+	for (int i = 0; i < 10000; i++)
+	{
+		pixels[i] = 0;
+	}
+
+    if( SDL_MUSTLOCK( image ) )
+    {
+		//Unlock surface
+        SDL_UnlockSurface( image );
+    }
+
+    return 0;
 }
 
 } // end namespace

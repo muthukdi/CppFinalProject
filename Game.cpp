@@ -924,8 +924,18 @@ void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL
 {
     if (renderable)
 	{
+		SDL_Texture *tex = renderable->GetTexture()->GetPtr();
+		// Darken the screen when the game is over
+		if (mRobot->GetLives())
+		{
+			SDL_SetTextureColorMod(tex, 255, 255, 255);
+		}
+		else
+		{
+			SDL_SetTextureColorMod(tex, 150, 150, 200);
+		}
         SDL_RenderCopyEx(mRenderer,
-                         renderable->GetTexture()->GetPtr(),
+                         tex,
                          renderable->GetRect(),
                          dstRect,
                          renderable->GetRotationAngle(),

@@ -201,6 +201,9 @@ public:
     void                    DeleteTexture(Texture* tex);
 
     void                    DeleteAll();
+
+private:
+	int						Grayscale(SDL_Surface *image);
 };
 
 } // end namespace
