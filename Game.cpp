@@ -630,6 +630,7 @@ void Game::Update(float dt)
 						Mix_HaltMusic();
 						if (mRobot->GetLives() == 0)
 						{
+							printf("\nGame over music is being played!");
 							Mix_VolumeMusic(32);
 							Mix_PlayMusic(mBadGameOverMusic, 0);
 						}
