@@ -8,8 +8,6 @@ class Robot{
 protected:
 	GG::Renderable*         mRenderable;
 	GG::Rect				mRect;
-	float                   mPosX;
-	float                   mPosY;
 	GG::Renderable*			mRenderableIdle;
 	GG::Renderable*			mRenderableRun;
 	GG::Renderable*			mRenderableJump;

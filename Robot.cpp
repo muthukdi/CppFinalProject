@@ -7,8 +7,6 @@ const float Robot::GRAVITY = 2500.0f;
 Robot::Robot(float x, float y)
 	: mRenderable(NULL)
 	, mRect(0,0,0,0)
-	, mPosX(x)
-	, mPosY(y)
 	, mRenderableIdle(NULL)
 	, mRenderableRun(NULL)
 	, mRenderableJump(NULL)
