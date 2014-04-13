@@ -21,6 +21,7 @@ Robot::Robot(float x, float y)
 	, mFalling(0)
 	, mDead(0)
 	, mAutoPilot(0)
+	, mLives(5)
 	, mJumpDisabled(0)
 	, mVelocityY(-850.0f)
 {
@@ -112,12 +113,17 @@ void Robot::Update(float dt)
 		{
 			mRenderable = mRenderableDie;
 		}
-		if (game->IsKeyDown(SDL_SCANCODE_R) && mVelocityY == 0)
+		if (game->IsKeyDown(SDL_SCANCODE_R) && mVelocityY == 0 && mLives > 0)
 		{
 			mDead = 0;
 			mRenderableDie->Rewind();
 			mVelocityY = -850.0f;
-			mRect.y = mBottomTileRect.y - mRect.h;
+			mRect.x = 35;
+			mRect.y = game->GetScrHeight()-160;
+			SetCollisionRect();
+			mDirection = 0;
+			game->SetScene(0);
+			game->LoadScene(game->GetScene(), true);
 			return;
 		}
 		mVelocityY += GRAVITY * dt;
@@ -289,10 +295,9 @@ void Robot::Update(float dt)
 		}
 		if (mRect.x <= -10)
 		{
-			int *scene = game->GetScene();
 			// If we are still in the first scene,
 			// don't let the robot go back
-			if (!*(scene))
+			if (!game->GetScene())
 			{
 				mRect.x = -10;
 			}
@@ -301,8 +306,8 @@ void Robot::Update(float dt)
 			else
 			{
 				mRect.x = game->GetScrWidth() + 10.0 - mRect.w;
-				(*scene)--;
-				game->LoadScene(*scene, false);
+				game->SetScene(game->GetScene() - 1);
+				game->LoadScene(game->GetScene(), false);
 			}
 		}
 		else
@@ -319,9 +324,8 @@ void Robot::Update(float dt)
 		if (mRect.x >= game->GetScrWidth() + 10.0 - mRect.w)
 		{
 			mRect.x = -10;
-			int *scene = game->GetScene();
-			(*scene)++;
-			game->LoadScene(*scene, true);
+			game->SetScene(game->GetScene() + 1);
+			game->LoadScene(game->GetScene(), true);
 		}
 		else
 		{

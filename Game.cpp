@@ -38,7 +38,8 @@ Game::Game()
 	, mDieSound(NULL)
 	, mBlockSound(NULL)
 	, mThudSound(NULL)
-	, mGameOverMusic(NULL)
+	, mGoodGameOverMusic(NULL)
+	, mBadGameOverMusic(NULL)
 	, mMusic(NULL)
 	, mCoins(NULL)
 	, mBackground(NULL)
@@ -46,7 +47,6 @@ Game::Game()
 	, mFlagPole(NULL)
 	, mPointsLabel(NULL)
 	, mLivesLabel(NULL)
-	, mLives(5)
 	, mPoints(0)
 {
 }
@@ -235,9 +235,10 @@ bool Game::Initialize()
 	}
 
 	//Load musicIn
-	mMusic = Mix_LoadMUS("media/music.wav");
-	mGameOverMusic = Mix_LoadMUS("media/gameover_music.wav");
-	if (mMusic == NULL || mGameOverMusic == NULL)
+	mMusic = Mix_LoadMUS("media/music.mp3");
+	mGoodGameOverMusic = Mix_LoadMUS("media/gameover_music.wav");
+	mBadGameOverMusic = Mix_LoadMUS("media/gameover_music.mp3");
+	if (mMusic == NULL || mGoodGameOverMusic == NULL || mBadGameOverMusic == NULL)
 	{
 		std::cerr << " Failed to load beat music! SDL_mixer Error:" << Mix_GetError() << std::endl;
 		return false;
@@ -263,8 +264,6 @@ bool Game::Initialize()
 	// initialize the foreground
 	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
 
-	// Play the background music
-	Mix_PlayMusic(mMusic, -1);
     return true;
 }
 
@@ -297,8 +296,10 @@ void Game::Shutdown()
 	//Free the music
 	Mix_FreeMusic(mMusic);
 	mMusic = NULL;
-	Mix_FreeMusic(mGameOverMusic);
-	mGameOverMusic = NULL;
+	Mix_FreeMusic(mGoodGameOverMusic);
+	mGoodGameOverMusic = NULL;
+	Mix_FreeMusic(mBadGameOverMusic);
+	mBadGameOverMusic = NULL;
 
 	//We also need to quit the mixer
 	Mix_Quit();
@@ -420,12 +421,12 @@ void Game::HandleEvent(const SDL_Event& e)
             if (mTimer.IsPaused())
 			{
                 mTimer.Unpause();
-				Mix_PlayMusic(mMusic, -1);
+				Mix_ResumeMusic();
             }
 			else
 			{
                 mTimer.Pause();
-				Mix_ResumeMusic();
+				Mix_PauseMusic();
             }
             break;
 		case SDLK_v:
@@ -439,13 +440,17 @@ void Game::HandleEvent(const SDL_Event& e)
 			if (Mix_PlayingMusic() == 0)
 			{
 				//Play the music
-				if (mScene < 6)
+				if (mRobot->GetLives() == 0)
+				{
+					Mix_PlayMusic(mBadGameOverMusic, 0);
+				}
+				else if (mScene < 6)
 				{
 					Mix_PlayMusic(mMusic, -1);
 				}
 				else
 				{
-					Mix_PlayMusic(mGameOverMusic, -1);
+					Mix_PlayMusic(mGoodGameOverMusic, -1);
 				}
 			}
 			//If music is being played
@@ -619,8 +624,15 @@ void Game::Update(float dt)
 					if (!mRobot->IsDead() && mRobot->GetVerticalVelocity() == -850.0f && crawler->GetState() != CrawlerWeak::CRAWLER_DYING)
 					{
 						// You lose a life:(
-						mLives--;
+						mRobot->SetLives(mRobot->GetLives() - 1);
 						Mix_PlayChannel(-1, mDieSound, 0);
+						// Stop the background music
+						Mix_HaltMusic();
+						if (mRobot->GetLives() == 0)
+						{
+							Mix_VolumeMusic(32);
+							Mix_PlayMusic(mBadGameOverMusic, 0);
+						}
 						mRobot->Bounce(-400, true);             // kill the robot
 					}
 				}
@@ -674,8 +686,17 @@ void Game::Update(float dt)
 				entity->GetRect().x + entity->GetRect().w > mRobot->GetCollisonRect().x &&
 				entity->GetRect().x < mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w && !mRobot->IsDead())
 		{
+			// You lose a life:(
+			mRobot->SetLives(mRobot->GetLives() - 1);
 			Mix_PlayChannel(-1, mThudSound, 0);
 			Mix_PlayChannel(-1, mDieSound, 0);
+			// Stop the background music
+			Mix_HaltMusic();
+			if (mRobot->GetLives() == 0)
+			{
+				Mix_VolumeMusic(32);
+				Mix_PlayMusic(mBadGameOverMusic, 0);
+			}
 			mRobot->Bounce(-400, true);             // kill the robot
 			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
 			mExplosions.push_back(boom);
@@ -690,9 +711,9 @@ void Game::Update(float dt)
     }
 
 	//
-    // create a new meteor every 0.5 seconds in scene 5
+    // create a new meteor every 0.2 to 1.2 seconds in scene 5
     //
-	if (mTime - mMeteorTime > 0.5 && mScene == 5)
+	if (mTime - mMeteorTime > GG::UnitRandom() + 0.2 && mScene == 5)
 	{
 		int randomX = GG::RandomInt(mScrWidth-64);
 		int randomRotation = GG::RandomInt(90) + 180;
@@ -715,7 +736,7 @@ void Game::Update(float dt)
 	// Update the lives label
 	mTexMgr->DeleteTexture("LivesLabel");
 	newLabel.str(std::string());
-	newLabel << "Lives = " << mLives;
+	newLabel << "Lives = " << mRobot->GetLives();
 	text_color.r = 255;
 	text_color.g = 50;
 	text_color.b = 50;
@@ -976,11 +997,19 @@ void Game::LoadScene(int scene, bool items)
 	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str());
 	mGrid = LoadLevel(t.str(), items);
 
+	// First scene
+	if (mScene == 0)
+	{
+		// Play the background music
+		Mix_VolumeMusic(32);
+		Mix_PlayMusic(mMusic, -1);
+	}
 	// Game over scene
 	if (mScene == 6)
 	{
 		mFlagPole = new Layer(mScrWidth *.8f, mScrHeight *.5f + 20, "FlagPole");
-		Mix_PlayMusic(mGameOverMusic, 0);
+		Mix_VolumeMusic(128);
+		Mix_PlayMusic(mGoodGameOverMusic, 0);
 	}
 }
 

@@ -23,6 +23,7 @@ protected:
 	bool					mFalling; // (1 for falling and 0 for not falling)
 	bool					mDead; // (1 for dead and 0 for not dead)
 	bool					mAutoPilot; // The game will control the robot!
+	int						mLives;
 
 	bool					mJumpDisabled; // Guards against jumping repeatedly by holding down SPACE!
 	float					mVelocityY;
@@ -40,6 +41,8 @@ public:
 	const bool				GetDirection() const				{ return mDirection; }
 	const bool				GetJumping() const					{ return mJumping; }
 	const bool				GetFalling() const					{ return mFalling; }
+	const int				GetLives() const					{ return mLives; }
+	void					SetLives(int lives)					{ mLives = lives; }
 	void					SetCollisionRect();
 	const bool				IsDead() const						{ return mDead; }
 	void					KillRobot()							{ mDead = 1; }

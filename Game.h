@@ -87,9 +87,9 @@ class Game {
 	Mix_Chunk*				mBlockSound;
 	Mix_Chunk*				mThudSound;
 	Mix_Music*				mMusic;
-	Mix_Music*				mGameOverMusic;
+	Mix_Music*				mGoodGameOverMusic;
+	Mix_Music*				mBadGameOverMusic;
 
-	int						mLives;
 	int						mPoints;
 
 public:
@@ -107,7 +107,7 @@ public:
 
     Grid*                   GetGrid() const					{ return mGrid; }
 	Robot*					GetRobot() const				{ return mRobot; }
-	int*					GetScene()						{ return &mScene; }
+	int						GetScene() const				{ return mScene; }
 	Layer*					GetFlagPole() const				{ return mFlagPole; }
 
     bool                    IsKeyDown(SDL_Scancode s)		{ return mKeyState[s] != 0; }
@@ -116,6 +116,7 @@ public:
 
 	std::list<Crawler*>*	GetCrawlers()					{ return &mCrawlers; }
 	std::list<Coin*>*		GetCoins()						{ return &mCoins; }
+	void					SetScene(int scene)				{ mScene = scene; }
 	void					LoadScene(int scene, bool items);
 	void					LoadTextures();
 	void					LoadSounds();
