@@ -382,7 +382,7 @@ TextureManager::LoadTexture
 
 ================================================================================
 */
-Texture* TextureManager::LoadTexture(const std::string& name, const std::string& filename, int numCells)
+Texture* TextureManager::LoadTexture(const std::string& name, const std::string& filename, bool grayscale, int numCells)
 {
     // determine full path
     std::string path = mRootDir + filename;
@@ -391,7 +391,7 @@ Texture* TextureManager::LoadTexture(const std::string& name, const std::string&
     Image img(path);                      
 
     // create texture from image
-    return LoadTexture(name, img, numCells);
+    return LoadTexture(name, img, grayscale, numCells);
 }
 
 /*
@@ -405,7 +405,7 @@ TextureManager::LoadTexture
 
 ================================================================================
 */
-Texture* TextureManager::LoadTexture(const std::string& name, const Image& img, int numCells)
+Texture* TextureManager::LoadTexture(const std::string& name, const Image& img, bool grayscale, int numCells)
 {
     if (img.IsLoaded()) {
 
@@ -416,8 +416,14 @@ Texture* TextureManager::LoadTexture(const std::string& name, const Image& img, 
         }
 
         SDL_Surface* surf = img.GetSurface();
-		//::cout << "\n" << name << "\n" << std::endl;
-		//Grayscale(surf);
+		// If grayscale has been requested
+		if (grayscale)
+		{
+			if (Grayscale(surf))
+			{
+				std::cout << name << ": Unable to convert this image into grayscale!" << "\n" << std::endl;
+			}
+		}
 
         SDL_Texture* tex = SDL_CreateTextureFromSurface(mRenderer, surf);
         if (!tex) {
@@ -600,25 +606,37 @@ void TextureManager::DeleteAll()
 TextureManager::Grayscale
 
     This method will iterate through each of the pixels in the image surface and 
-	set all of its color components (r, g, b, a) to the average value of these
-	components.  This should effectively convert the image into grayscale.
+	set all of its color components (r, g, b) to the average value of these
+	components.  This should effectively convert the image into grayscale.  Note,
+	howerver, that this algorithm only works for 24-bit and 32-bit surfaces.
 
 ================================================================================
 */
 int TextureManager::Grayscale(SDL_Surface *image)
 {
+	Uint8 colorDepth = image->format->BytesPerPixel;
+	// Not enought color information
+	if (colorDepth < 3)
+	{
+		return 1;
+	}
 	//If the surface must be locked
     if( SDL_MUSTLOCK( image ) )
     {
 		//Lock the surface
         SDL_LockSurface( image );
     }
-	unsigned bytes = image->w * image->h * 4;
-	//Convert the pixels to 8 bit
+	unsigned bytes = image->w * image->h * colorDepth;
     Uint8 *pixels = (Uint8 *)image->pixels;
-	for (int i = 0; i < 10000; i++)
+	Uint8 r, g, b;
+	for (int i = 0; i < bytes; i += colorDepth)
 	{
-		pixels[i] = 0;
+		r = pixels[i];
+		g = pixels[i+1];
+		b = pixels[i+2];
+		pixels[i] = (r + g + b) / 3;
+		pixels[i+1] = (r + g + b) / 3;
+		pixels[i+2] = (r + g + b) / 3;
 	}
 
     if( SDL_MUSTLOCK( image ) )

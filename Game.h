@@ -118,7 +118,7 @@ public:
 	std::list<Coin*>*		GetCoins()						{ return &mCoins; }
 	void					SetScene(int scene)				{ mScene = scene; }
 	void					LoadScene(int scene, bool items);
-	void					LoadTextures();
+	void					LoadTextures(bool grayscale);
 	void					LoadSounds();
 
 private:

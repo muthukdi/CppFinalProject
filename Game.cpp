@@ -253,7 +253,7 @@ bool Game::Initialize()
 	}
 
     // load textures
-	LoadTextures();
+	LoadTextures(true);
 
     // initialize grid from a text file (including crawlers and coins!)
     LoadScene(mScene, true);
@@ -924,18 +924,8 @@ void Game::Render(const GG::Renderable* renderable, const GG::Rect* dstRect, SDL
 {
     if (renderable)
 	{
-		SDL_Texture *tex = renderable->GetTexture()->GetPtr();
-		// Darken the screen when the game is over
-		if (mRobot->GetLives())
-		{
-			SDL_SetTextureColorMod(tex, 255, 255, 255);
-		}
-		else
-		{
-			SDL_SetTextureColorMod(tex, 150, 150, 200);
-		}
         SDL_RenderCopyEx(mRenderer,
-                         tex,
+                         renderable->GetTexture()->GetPtr(),
                          renderable->GetRect(),
                          dstRect,
                          renderable->GetRotationAngle(),
@@ -1024,33 +1014,33 @@ void Game::LoadScene(int scene, bool items)
 	}
 }
 
-void Game::LoadTextures()
+void Game::LoadTextures(bool grayscale)
 {
-	mTexMgr->LoadTexture("Background1", "Layer1.png");
-	mTexMgr->LoadTexture("Background2", "Layer2.png");
-	mTexMgr->LoadTexture("Background3", "Layer3.png");
-	mTexMgr->LoadTexture("Background4", "Layer4.png");
-	mTexMgr->LoadTexture("Background5", "Layer5.png");
-	mTexMgr->LoadTexture("Background6", "Layer6.png");
-	mTexMgr->LoadTexture("Background7", "Layer7.png");
-	mTexMgr->LoadTexture("Foreground", "Layer0.png");
-    mTexMgr->LoadTexture("Tiles", "tiles.tga", 7);
-	mTexMgr->LoadTexture("Tiles2", "tiles2.tga", 7);
-    mTexMgr->LoadTexture("Explosion", "explosion.tga", 16);
-	mTexMgr->LoadTexture("RobotIdle", "robot_idle.png", 8);
-	mTexMgr->LoadTexture("RobotRun", "robot_run.png", 6);
-	mTexMgr->LoadTexture("RobotJump", "robot_jump.png", 8);
-	mTexMgr->LoadTexture("RobotDie", "robot_die.png", 8);
-	mTexMgr->LoadTexture("RobotWalk", "robot_walk.png", 8);
-	mTexMgr->LoadTexture("RobotCelebrate", "robot_celebrate.png", 13);
-	mTexMgr->LoadTexture("Meteor", "meteor.png");
-	mTexMgr->LoadTexture("CrawlerWalk", "crawler_walk.png", 8);
-    mTexMgr->LoadTexture("CrawlerIdle", "crawler_idle.png", 8);
-	mTexMgr->LoadTexture("CrawlerWalkPink", "crawler_walk_pink.png", 8);
-	mTexMgr->LoadTexture("CrawlerIdlePink", "crawler_idle_pink.png", 8);
-	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", 8);
-	mTexMgr->LoadTexture("Coin", "coin.png", 10);
-	mTexMgr->LoadTexture("FlagPole", "flagpole.png");
+	mTexMgr->LoadTexture("Background1", "Layer1.png", grayscale);
+	mTexMgr->LoadTexture("Background2", "Layer2.png", grayscale);
+	mTexMgr->LoadTexture("Background3", "Layer3.png", grayscale);
+	mTexMgr->LoadTexture("Background4", "Layer4.png", grayscale);
+	mTexMgr->LoadTexture("Background5", "Layer5.png", grayscale);
+	mTexMgr->LoadTexture("Background6", "Layer6.png", grayscale);
+	mTexMgr->LoadTexture("Background7", "Layer7.png", grayscale);
+	mTexMgr->LoadTexture("Foreground", "Layer0.png", grayscale);
+    mTexMgr->LoadTexture("Tiles", "tiles.tga", grayscale, 7);
+	mTexMgr->LoadTexture("Tiles2", "tiles2.tga", grayscale, 7);
+    mTexMgr->LoadTexture("Explosion", "explosion.tga", grayscale, 16);
+	mTexMgr->LoadTexture("RobotIdle", "robot_idle.png", grayscale, 8);
+	mTexMgr->LoadTexture("RobotRun", "robot_run.png", grayscale, 6);
+	mTexMgr->LoadTexture("RobotJump", "robot_jump.png", grayscale, 8);
+	mTexMgr->LoadTexture("RobotDie", "robot_die.png", grayscale, 8);
+	mTexMgr->LoadTexture("RobotWalk", "robot_walk.png", grayscale, 8);
+	mTexMgr->LoadTexture("RobotCelebrate", "robot_celebrate.png", grayscale, 13);
+	mTexMgr->LoadTexture("Meteor", "meteor.png", grayscale);
+	mTexMgr->LoadTexture("CrawlerWalk", "crawler_walk.png", grayscale, 8);
+    mTexMgr->LoadTexture("CrawlerIdle", "crawler_idle.png", grayscale, 8);
+	mTexMgr->LoadTexture("CrawlerWalkPink", "crawler_walk_pink.png", grayscale, 8);
+	mTexMgr->LoadTexture("CrawlerIdlePink", "crawler_idle_pink.png", grayscale, 8);
+	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", grayscale, 8);
+	mTexMgr->LoadTexture("Coin", "coin.png", grayscale, 10);
+	mTexMgr->LoadTexture("FlagPole", "flagpole.png", grayscale);
 }
 
 void Game::LoadSounds()
