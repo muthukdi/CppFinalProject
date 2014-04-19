@@ -10,9 +10,10 @@ Explosion::Explosion(int x, int y)
 {
     // get the texture
     GG::Texture* tex = Game::GetInstance()->GetTextureManager()->GetTexture("Explosion");
+	GG::Texture* grayTex = Game::GetInstance()->GetTextureManager()->GetTexture("ExplosionGray");
 
     // create the explosion animation
-    mRenderable = new GG::Renderable(tex, 1.15f, false);
+    mRenderable = new GG::Renderable(tex, grayTex, 1.15f, false);
 
     // center the screen rect at the specified coordinates
     mRect.x = x - mRenderable->GetWidth() / 2;
@@ -34,4 +35,9 @@ void Explosion::Update(float dt)
     mRenderable->Animate(dt);
 
     mTimeToLive -= dt;
+}
+
+void Explosion::SetGrayscale(bool grayscale)
+{
+	mRenderable->SetGrayscale(grayscale);
 }

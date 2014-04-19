@@ -3,14 +3,15 @@
 
 #include <iostream>
 
-Layer::Layer(float x, float y, const std::string name)
+Layer::Layer(float x, float y, const std::string texName, const std::string grayTexName)
     : mRenderable(NULL)
     , mPosX(x)
     , mPosY(y)
 {
-    GG::Texture* tex = Game::GetInstance()->GetTextureManager()->GetTexture(name);
+    GG::Texture* tex = Game::GetInstance()->GetTextureManager()->GetTexture(texName);
+	GG::Texture* grayTex = Game::GetInstance()->GetTextureManager()->GetTexture(grayTexName);
 
-    mRenderable = new GG::Renderable(tex);
+    mRenderable = new GG::Renderable(tex, grayTex);
 
     // center the layer at the specified coordinate
     mRect.x = (int)x - mRenderable->GetWidth() / 2;
@@ -22,4 +23,9 @@ Layer::Layer(float x, float y, const std::string name)
 Layer::~Layer()
 {
     delete mRenderable;
+}
+
+void Layer::SetGrayscale(bool grayscale)
+{
+	mRenderable->SetGrayscale(grayscale);
 }

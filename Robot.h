@@ -32,7 +32,7 @@ protected:
 public:
 							Robot(float x, float y);
 							~Robot();
-	GG::Renderable*         GetRenderable() const				{ return mRenderable; }
+	GG::Renderable*         GetRenderable() 				{ return mRenderable; }
 	const GG::Rect&			GetRect() const						{ return mRect; }
 	const GG::Rect&			GetCollisonRect() const				{ return mCollisionRect; }
 	const GG::Rect&			GetBottomTileRect() const			{ return mBottomTileRect; }
@@ -50,6 +50,8 @@ public:
 	void					Bounce(float velocity, bool killed);
 	const float				GetVerticalVelocity() const			{ return mVelocityY; }
 	void					Update(float dt);
+
+	void					SetGrayscale(bool grayscale);
 };
 
 #endif

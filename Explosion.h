@@ -13,12 +13,14 @@ public:
                             Explosion(int x, int y);
                             ~Explosion();
 
-    GG::Renderable*         GetRenderable() const   { return mRenderable; }
+    GG::Renderable*         GetRenderable()		   { return mRenderable; }
     const GG::Rect&         GetRect() const         { return mRect; }
 
     bool                    IsFinished() const      { return mTimeToLive <= 0; }
 
     void                    Update(float dt);
+
+	void					SetGrayscale(bool grayscale);
 };
 
 #endif

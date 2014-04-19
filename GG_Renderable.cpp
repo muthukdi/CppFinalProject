@@ -14,8 +14,10 @@ Renderable constructor (non-animated)
 
 ================================================================================
 */
-Renderable::Renderable(const Texture* tex)
+Renderable::Renderable(const Texture* tex, const Texture* grayTex)
     : mTex(tex)
+	, mGrayscaleTex(grayTex)
+	, mGrayscale(false)
     , mNumFrames(1)
     , mDuration(0.0f)
     , mLoopable(false)
@@ -46,8 +48,10 @@ Renderable constructor (non-animated)
 
 ================================================================================
 */
-Renderable::Renderable(const Texture* tex, int cellNo)
+Renderable::Renderable(const Texture* tex, const Texture* grayscaleTex, int cellNo)
     : mTex(tex)
+	, mGrayscaleTex(grayscaleTex)
+	, mGrayscale(false)
     , mNumFrames(1)
     , mDuration(0.0f)
     , mLoopable(false)
@@ -78,8 +82,10 @@ Renderable constructor (animated)
 
 ================================================================================
 */
-Renderable::Renderable(const Texture* tex, float duration, bool loopable)
+Renderable::Renderable(const Texture* tex, const Texture* grayscaleTex, float duration, bool loopable)
     : mTex(tex)
+	, mGrayscaleTex(grayscaleTex)
+	, mGrayscale(false)
     , mNumFrames(tex->GetNumCells())
     , mDuration(duration)
     , mLoopable(loopable)

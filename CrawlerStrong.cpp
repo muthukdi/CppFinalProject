@@ -15,19 +15,22 @@ CrawlerStrong::CrawlerStrong(float x, float y, bool jumpedOn)
     GG::TextureManager* texMgr = Game::GetInstance()->GetTextureManager();
 
 	GG::Texture* idleTex = texMgr->GetTexture("CrawlerIdle");
-	mIdleNonRenderable = new GG::Renderable(idleTex, 0.5f, true);
+	GG::Texture* grayIdleTex = texMgr->GetTexture("CrawlerIdleGray");
+	mIdleNonRenderable = new GG::Renderable(idleTex, grayIdleTex, 0.5f, true);
 
 	GG::Texture* walkTex = texMgr->GetTexture("CrawlerWalk");
-	mWalkNonRenderable = new GG::Renderable(walkTex, 0.5f, true);
+	GG::Texture* grayWalkTex = texMgr->GetTexture("CrawlerWalkGray");
+	mWalkNonRenderable = new GG::Renderable(walkTex, grayWalkTex, 0.5f, true);
 
 	GG::Texture* idleTexPink = texMgr->GetTexture("CrawlerIdlePink");
-	mIdleRenderable = new GG::Renderable(idleTexPink, 0.5f, true);
+	mIdleRenderable = new GG::Renderable(idleTexPink, grayIdleTex, 0.5f, true);
 
 	GG::Texture* walkTexPink = texMgr->GetTexture("CrawlerWalkPink");
-	mWalkRenderable = new GG::Renderable(walkTexPink, 0.5f, true);
+	mWalkRenderable = new GG::Renderable(walkTexPink, grayWalkTex, 0.5f, true);
 	
 	GG::Texture* dieTex = texMgr->GetTexture("CrawlerDie");
-    mDieRenderable = new GG::Renderable(dieTex, 0.5f, false);
+	GG::Texture* grayDieTex = texMgr->GetTexture("CrawlerDieGray");
+    mDieRenderable = new GG::Renderable(dieTex, grayDieTex, 0.5f, false);
 
 	// set time to live to duration of jumping animation
     mTimeToDeath = mDieRenderable->GetDuration();
@@ -152,4 +155,13 @@ void CrawlerStrong::Update(float dt)
 		// shouldn't happen
 		break;
 	}
+}
+
+void CrawlerStrong::SetGrayscale(bool grayscale)
+{
+	mIdleRenderable->SetGrayscale(grayscale);
+	mWalkRenderable->SetGrayscale(grayscale);
+	mDieRenderable->SetGrayscale(grayscale);
+	mIdleNonRenderable->SetGrayscale(grayscale);
+	mWalkNonRenderable->SetGrayscale(grayscale);
 }

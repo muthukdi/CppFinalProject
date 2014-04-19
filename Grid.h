@@ -14,7 +14,9 @@ public:
 
     void                    SetRenderable(GG::Renderable* renderable);  // takes ownership
 
-    GG::Renderable*         GetRenderable() const   { return mRenderable; }
+    GG::Renderable*         GetRenderable()		   { return mRenderable; }
+
+	void					SetGrayscale(bool grayscale);
 };
 
 

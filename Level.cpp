@@ -9,47 +9,6 @@
 #include "CrawlerStrong.h"
 #include "Coin.h"
 
-Grid* CreateRandomLevel(const std::string& tileTexName)
-{
-    Game* game = Game::GetInstance();
-
-    // get the tile texture
-    GG::Texture* tex = game->GetTextureManager()->GetTexture(tileTexName);
-
-    // how many different tiles are available in the texture?
-    int numTiles = tex->GetNumCells();
-
-    int tileWidth = tex->GetCellWidth();
-    int tileHeight = tex->GetCellHeight();
-
-    int scrWidth = game->GetScrWidth();
-    int scrHeight = game->GetScrHeight();
-
-    // world grid size based on screen size and tile size
-    int numCols = scrWidth / tileWidth;
-    int numRows = scrHeight / tileHeight;
-
-    Grid* grid = new Grid;
-    grid->Allocate(numCols, numRows, tileWidth, tileHeight);
-
-	for (int y = 0; y < numRows; y++) {
-        for (int x = 0; x < numCols; x++) {
-
-            Tile* tile = grid->GetTile(y, x);
-
-            int r = GG::RandomInt(3 * numTiles);
-
-            if (r < numTiles) {
-                tile->SetRenderable(new GG::Renderable(tex, r));  // tile takes ownership of renderable
-            } else {
-                tile->SetRenderable(NULL);
-            }
-        }
-    }
-
-    return grid;
-}
-
 Grid* LoadLevel(const std::string& filename, bool items)
 {
 	std::fstream f(filename);
@@ -91,7 +50,9 @@ Grid* LoadLevel(const std::string& filename, bool items)
 
 	Game* game = Game::GetInstance();
 	GG::Texture* tex = game->GetTextureManager()->GetTexture("Tiles");
+	GG::Texture* grayTex = game->GetTextureManager()->GetTexture("TilesGray");
 	GG::Texture* tex2 = game->GetTextureManager()->GetTexture("Tiles2");
+	GG::Texture* grayTex2 = game->GetTextureManager()->GetTexture("TilesGray2");
 
 	int numCells = tex->GetNumCells();
 	int tileWidth = tex->GetCellWidth();
@@ -138,13 +99,13 @@ Grid* LoadLevel(const std::string& filename, bool items)
 			case '@':
 			{
 				int r = GG::RandomInt(numCells);
-				tile->SetRenderable(new GG::Renderable(tex2, r));
+				tile->SetRenderable(new GG::Renderable(tex2, grayTex2, r));
 				break;
 			}
 			case '#':
 			{
 				int r = GG::RandomInt(numCells);
-				tile->SetRenderable(new GG::Renderable(tex, r));
+				tile->SetRenderable(new GG::Renderable(tex, grayTex, r));
 				break;
 			}
 			default:

@@ -130,3 +130,10 @@ void Crawler::SetState(AIState newState)
 
 	mState = newState;
 }
+
+void Crawler::SetGrayscale(bool grayscale)
+{
+	mIdleRenderable->SetGrayscale(grayscale);
+	mWalkRenderable->SetGrayscale(grayscale);
+	mDieRenderable->SetGrayscale(grayscale);
+}

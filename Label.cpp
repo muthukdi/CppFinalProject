@@ -10,7 +10,7 @@ Label::Label(float x, float y, const std::string name)
 {
     GG::Texture* tex = Game::GetInstance()->GetTextureManager()->GetTexture(name);
 
-    mRenderable = new GG::Renderable(tex);
+    mRenderable = new GG::Renderable(tex, tex);
 
     // Position the top left hand corner of the label at
 	// the specified coordinates

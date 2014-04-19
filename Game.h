@@ -118,8 +118,10 @@ public:
 	std::list<Coin*>*		GetCoins()						{ return &mCoins; }
 	void					SetScene(int scene)				{ mScene = scene; }
 	void					LoadScene(int scene, bool items);
-	void					LoadTextures(bool grayscale);
+	void					LoadTextures();
+	void					LoadGrayscaleTextures();
 	void					LoadSounds();
+	void					SetEntitiesGrayscale(bool grayscale);
 
 private:
                             Game();

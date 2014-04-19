@@ -17,6 +17,7 @@ public:
 
 
 	void                        Update(float dt) override;
+	void						SetGrayscale(bool grayscale);
 };
 
 #endif

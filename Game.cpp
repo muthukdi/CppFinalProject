@@ -253,7 +253,8 @@ bool Game::Initialize()
 	}
 
     // load textures
-	LoadTextures(true);
+	LoadTextures();
+	LoadGrayscaleTextures();
 
     // initialize grid from a text file (including crawlers and coins!)
     LoadScene(mScene, true);
@@ -262,7 +263,7 @@ bool Game::Initialize()
 	mRobot = new Robot(35.0f, mScrHeight-160.0f);
 
 	// initialize the foreground
-	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground");
+	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground", "Foreground2");
 
     return true;
 }
@@ -472,21 +473,27 @@ void Game::HandleEvent(const SDL_Event& e)
 			break;
 		case SDLK_x:
 			{
-				// Add a strong crawler
-				float x = GG::RandomFloat(32, mScrWidth - 32.0f);
-				Crawler* crawler = new CrawlerStrong(x, mScrHeight - 1.0f - 32.0f, false);
-				crawler->SetDirection(GG::RandomSign());
-				mCrawlers.push_back(crawler);
+				if (!mRobot->IsDead())
+				{
+					// Add a strong crawler
+					float x = GG::RandomFloat(32, mScrWidth - 32.0f);
+					Crawler* crawler = new CrawlerStrong(x, mScrHeight - 1.0f - 32.0f, false);
+					crawler->SetDirection(GG::RandomSign());
+					mCrawlers.push_back(crawler);
+				}
 				break;		
 			}
 
 		case SDLK_c:
 			{
-				// Add a weak crawler
-				float x = GG::RandomFloat(32, mScrWidth - 32.0f);
-				Crawler* crawler = new CrawlerWeak(x, mScrHeight - 1.0f - 32.0f, true);
-				crawler->SetDirection(GG::RandomSign());
-				mCrawlers.push_back(crawler);
+				if (!mRobot->IsDead())
+				{
+					// Add a weak crawler
+					float x = GG::RandomFloat(32, mScrWidth - 32.0f);
+					Crawler* crawler = new CrawlerWeak(x, mScrHeight - 1.0f - 32.0f, true);
+					crawler->SetDirection(GG::RandomSign());
+					mCrawlers.push_back(crawler);
+				}
 				break;
 			}
         }
@@ -633,6 +640,7 @@ void Game::Update(float dt)
 							printf("\nGame over music is being played!");
 							Mix_VolumeMusic(32);
 							Mix_PlayMusic(mBadGameOverMusic, 0);
+							SetEntitiesGrayscale(true);
 						}
 						mRobot->Bounce(-400, true);             // kill the robot
 					}
@@ -675,7 +683,10 @@ void Game::Update(float dt)
 		// If the meteor has either reached the ground, destroy it with an explosion
         if (entity->GetRect().y > mScrHeight-32-64) 
 		{
-			Mix_PlayChannel(-1, mThudSound, 0);
+			if (!mRobot->IsDead())
+			{
+				Mix_PlayChannel(-1, mThudSound, 0);
+			}
 			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
             mExplosions.push_back(boom);
             metIt = mMeteors.erase(metIt); // remove the entry from the list and advance iterator
@@ -697,6 +708,7 @@ void Game::Update(float dt)
 			{
 				Mix_VolumeMusic(32);
 				Mix_PlayMusic(mBadGameOverMusic, 0);
+				SetEntitiesGrayscale(true);
 			}
 			mRobot->Bounce(-400, true);             // kill the robot
 			Explosion* boom = new Explosion(entity->GetRect().x + entity->GetRect().w / 2, entity->GetRect().y + entity->GetRect().h / 2);
@@ -992,10 +1004,11 @@ void Game::LoadScene(int scene, bool items)
 	delete mGrid;
 	mGrid = NULL;
 
-	std::stringstream b, t;
+	std::stringstream b, gb, t;
 	t << "media/" << mScene << ".txt";
 	b << "Background" << mScene + 1;
-	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str());
+	gb << "BackgroundGray" << mScene + 1;
+	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str(), gb.str());
 	mGrid = LoadLevel(t.str(), items);
 
 	// First scene
@@ -1008,39 +1021,68 @@ void Game::LoadScene(int scene, bool items)
 	// Game over scene
 	if (mScene == 6)
 	{
-		mFlagPole = new Layer(mScrWidth *.8f, mScrHeight *.5f + 20, "FlagPole");
+		mFlagPole = new Layer(mScrWidth *.8f, mScrHeight *.5f + 20, "FlagPole", "FlagPoleGray");
 		Mix_VolumeMusic(128);
 		Mix_PlayMusic(mGoodGameOverMusic, 0);
 	}
 }
 
-void Game::LoadTextures(bool grayscale)
+// Load textures without grayscale
+void Game::LoadTextures()
 {
-	mTexMgr->LoadTexture("Background1", "Layer1.png", grayscale);
-	mTexMgr->LoadTexture("Background2", "Layer2.png", grayscale);
-	mTexMgr->LoadTexture("Background3", "Layer3.png", grayscale);
-	mTexMgr->LoadTexture("Background4", "Layer4.png", grayscale);
-	mTexMgr->LoadTexture("Background5", "Layer5.png", grayscale);
-	mTexMgr->LoadTexture("Background6", "Layer6.png", grayscale);
-	mTexMgr->LoadTexture("Background7", "Layer7.png", grayscale);
-	mTexMgr->LoadTexture("Foreground", "Layer0.png", grayscale);
-    mTexMgr->LoadTexture("Tiles", "tiles.tga", grayscale, 7);
-	mTexMgr->LoadTexture("Tiles2", "tiles2.tga", grayscale, 7);
-    mTexMgr->LoadTexture("Explosion", "explosion.tga", grayscale, 16);
-	mTexMgr->LoadTexture("RobotIdle", "robot_idle.png", grayscale, 8);
-	mTexMgr->LoadTexture("RobotRun", "robot_run.png", grayscale, 6);
-	mTexMgr->LoadTexture("RobotJump", "robot_jump.png", grayscale, 8);
-	mTexMgr->LoadTexture("RobotDie", "robot_die.png", grayscale, 8);
-	mTexMgr->LoadTexture("RobotWalk", "robot_walk.png", grayscale, 8);
-	mTexMgr->LoadTexture("RobotCelebrate", "robot_celebrate.png", grayscale, 13);
-	mTexMgr->LoadTexture("Meteor", "meteor.png", grayscale);
-	mTexMgr->LoadTexture("CrawlerWalk", "crawler_walk.png", grayscale, 8);
-    mTexMgr->LoadTexture("CrawlerIdle", "crawler_idle.png", grayscale, 8);
-	mTexMgr->LoadTexture("CrawlerWalkPink", "crawler_walk_pink.png", grayscale, 8);
-	mTexMgr->LoadTexture("CrawlerIdlePink", "crawler_idle_pink.png", grayscale, 8);
-	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", grayscale, 8);
-	mTexMgr->LoadTexture("Coin", "coin.png", grayscale, 10);
-	mTexMgr->LoadTexture("FlagPole", "flagpole.png", grayscale);
+	mTexMgr->LoadTexture("Background1", "Layer1.png", false);
+	mTexMgr->LoadTexture("Background2", "Layer2.png", false);
+	mTexMgr->LoadTexture("Background3", "Layer3.png", false);
+	mTexMgr->LoadTexture("Background4", "Layer4.png", false);
+	mTexMgr->LoadTexture("Background5", "Layer5.png", false);
+	mTexMgr->LoadTexture("Background6", "Layer6.png", false);
+	mTexMgr->LoadTexture("Background7", "Layer7.png", false);
+	mTexMgr->LoadTexture("Foreground", "Layer0.png", false);
+    mTexMgr->LoadTexture("Tiles", "tiles.tga", false, 7);
+	mTexMgr->LoadTexture("Tiles2", "tiles2.tga", false, 7);
+    mTexMgr->LoadTexture("Explosion", "explosion.tga", false, 16);
+	mTexMgr->LoadTexture("RobotIdle", "robot_idle.png", false, 8);
+	mTexMgr->LoadTexture("RobotRun", "robot_run.png", false, 6);
+	mTexMgr->LoadTexture("RobotJump", "robot_jump.png", false, 8);
+	mTexMgr->LoadTexture("RobotDie", "robot_die.png", false, 8);
+	mTexMgr->LoadTexture("RobotWalk", "robot_walk.png", false, 8);
+	mTexMgr->LoadTexture("RobotCelebrate", "robot_celebrate.png", false, 13);
+	mTexMgr->LoadTexture("Meteor", "meteor.png", false);
+	mTexMgr->LoadTexture("CrawlerWalk", "crawler_walk.png", false, 8);
+    mTexMgr->LoadTexture("CrawlerIdle", "crawler_idle.png", false, 8);
+	mTexMgr->LoadTexture("CrawlerWalkPink", "crawler_walk_pink.png", false, 8);
+	mTexMgr->LoadTexture("CrawlerIdlePink", "crawler_idle_pink.png", false, 8);
+	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", false, 8);
+	mTexMgr->LoadTexture("Coin", "coin.png", false, 10);
+	mTexMgr->LoadTexture("FlagPole", "flagpole.png", false);
+}
+
+// Load textures with grayscale (done programmatically!)
+void Game::LoadGrayscaleTextures()
+{
+	mTexMgr->LoadTexture("BackgroundGray1", "Layer1.png", true);
+	mTexMgr->LoadTexture("BackgroundGray2", "Layer2.png", true);
+	mTexMgr->LoadTexture("BackgroundGray3", "Layer3.png", true);
+	mTexMgr->LoadTexture("BackgroundGray4", "Layer4.png", true);
+	mTexMgr->LoadTexture("BackgroundGray5", "Layer5.png", true);
+	mTexMgr->LoadTexture("BackgroundGray6", "Layer6.png", true);
+	mTexMgr->LoadTexture("BackgroundGray7", "Layer7.png", true);
+	mTexMgr->LoadTexture("ForegroundGray", "Layer0.png", true);
+    mTexMgr->LoadTexture("TilesGray", "tiles.tga", true, 7);
+	mTexMgr->LoadTexture("TilesGray2", "tiles2.tga", true, 7);
+    mTexMgr->LoadTexture("ExplosionGray", "explosion.tga", true, 16);
+	mTexMgr->LoadTexture("RobotIdleGray", "robot_idle.png", true, 8);
+	mTexMgr->LoadTexture("RobotRunGray", "robot_run.png", true, 6);
+	mTexMgr->LoadTexture("RobotJumpGray", "robot_jump.png", true, 8);
+	mTexMgr->LoadTexture("RobotDieGray", "robot_die.png", true, 8);
+	mTexMgr->LoadTexture("RobotWalkGray", "robot_walk.png", true, 8);
+	mTexMgr->LoadTexture("RobotCelebrateGray", "robot_celebrate.png", true, 13);
+	mTexMgr->LoadTexture("MeteorGray", "meteor.png", true);
+	mTexMgr->LoadTexture("CrawlerWalkGray", "crawler_walk.png", true, 8);
+    mTexMgr->LoadTexture("CrawlerIdleGray", "crawler_idle.png", true, 8);
+	mTexMgr->LoadTexture("CrawlerDieGray", "crawler_die.png", true, 8);
+	mTexMgr->LoadTexture("CoinGray", "coin.png", true, 10);
+	mTexMgr->LoadTexture("FlagPoleGray", "flagpole.png", true);
 }
 
 void Game::LoadSounds()
@@ -1052,4 +1094,63 @@ void Game::LoadSounds()
 	mDieSound = Mix_LoadWAV("media/die_sound.wav");
 	mBlockSound = Mix_LoadWAV("media/block_sound.wav");
 	mThudSound = Mix_LoadWAV("media/thud_sound.wav");
+}
+
+// Tells the entities to use their grayscale renderables
+// instead of their colored ones (applies to all entities)
+void Game::SetEntitiesGrayscale(bool grayscale)
+{
+	if (mRobot) mRobot->SetGrayscale(grayscale);
+	if (mBackground) mBackground->SetGrayscale(grayscale);
+	if (mForeground) mForeground->SetGrayscale(grayscale);
+	if (mFlagPole) mFlagPole->SetGrayscale(grayscale);
+	
+	if (mGrid)
+	{
+        int tileWidth = mGrid->TileWidth();
+        int tileHeight = mGrid->TileHeight();
+        GG::Rect tileRect(0, 0, tileWidth, tileHeight);
+        for (int y = 0; y < mGrid->NumRows(); y++)
+		{
+            for (int x = 0; x < mGrid->NumCols(); x++)
+			{
+                Tile* tile = mGrid->GetTile(y, x);
+                if (tile->GetRenderable())
+				{
+                    tile->SetGrayscale(grayscale);
+                }
+                tileRect.x += tileWidth;
+            }
+            tileRect.y += tileHeight;
+            tileRect.x = 0;
+        }
+    }
+
+	std::list<Explosion*>::iterator it = mExplosions.begin();
+    for ( ; it != mExplosions.end(); ++it)
+	{
+        Explosion* boom = *it;
+        boom->SetGrayscale(grayscale);
+    }
+
+	std::list<Meteor*>::iterator metIt = mMeteors.begin();
+    for ( ; metIt != mMeteors.end(); ++metIt)
+	{
+        Meteor* meteor = *metIt;
+        meteor->SetGrayscale(grayscale);
+    }
+
+	std::list<Crawler*>::iterator crawlerIter = mCrawlers.begin();
+    for ( ; crawlerIter != mCrawlers.end(); ++crawlerIter)
+	{
+        Crawler* crawler = *crawlerIter;
+        crawler->SetGrayscale(grayscale);
+    }
+
+	std::list<Coin*>::iterator coinIter = mCoins.begin();
+    for ( ; coinIter != mCoins.end(); ++coinIter)
+	{
+        Coin* coin = *coinIter;
+        coin->SetGrayscale(grayscale);
+    }
 }

@@ -28,17 +28,23 @@ Robot::Robot(float x, float y)
 	Game* game = Game::GetInstance();
 	GG::TextureManager* texMgr = game->GetTextureManager();
 	GG::Texture *tex = texMgr->GetTexture("RobotIdle");
-	mRenderableIdle = new GG::Renderable(tex, 1.0f, true);
+	GG::Texture *grayTex = texMgr->GetTexture("RobotIdleGray");
+	mRenderableIdle = new GG::Renderable(tex, grayTex, 1.0f, true);
 	tex = texMgr->GetTexture("RobotRun");
-	mRenderableRun = new GG::Renderable(tex, 0.5f, true);
+	grayTex = texMgr->GetTexture("RobotRunGray");
+	mRenderableRun = new GG::Renderable(tex, grayTex, 0.5f, true);
 	tex = texMgr->GetTexture("RobotJump");
-	mRenderableJump = new GG::Renderable(tex, 1.0f, true);
+	grayTex = texMgr->GetTexture("RobotJumpGray");
+	mRenderableJump = new GG::Renderable(tex, grayTex, 1.0f, true);
 	tex = texMgr->GetTexture("RobotDie");
-	mRenderableDie = new GG::Renderable(tex, 1.4f, false);
+	grayTex = texMgr->GetTexture("RobotDieGray");
+	mRenderableDie = new GG::Renderable(tex, grayTex, 1.4f, false);
 	tex = texMgr->GetTexture("RobotWalk");
-	mRenderableWalk = new GG::Renderable(tex, 1.0f, true);
+	grayTex = texMgr->GetTexture("RobotWalkGray");
+	mRenderableWalk = new GG::Renderable(tex, grayTex, 1.0f, true);
 	tex = texMgr->GetTexture("RobotCelebrate");
-	mRenderableCelebrate = new GG::Renderable(tex, 1.4f, true);
+	grayTex = texMgr->GetTexture("RobotCelebrateGray");
+	mRenderableCelebrate = new GG::Renderable(tex, grayTex, 1.4f, true);
 
 	mRenderable = mRenderableIdle;
 	mRect.x = (int)x;
@@ -388,4 +394,14 @@ void Robot::SetAutoPilot(bool mode)
 		mAutoPilot = mode; 
 		mRenderable = mRenderableWalk;
 	}
+}
+
+void Robot::SetGrayscale(bool grayscale)
+{
+	mRenderableIdle->SetGrayscale(grayscale);
+	mRenderableWalk->SetGrayscale(grayscale);
+	mRenderableJump->SetGrayscale(grayscale);
+	mRenderableDie->SetGrayscale(grayscale);
+	mRenderableCelebrate->SetGrayscale(grayscale);
+	mRenderableRun->SetGrayscale(grayscale);
 }

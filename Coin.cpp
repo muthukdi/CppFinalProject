@@ -12,9 +12,10 @@ Coin::Coin(float x, float y)
 {
 	// get the texture
 	GG::Texture* tex = Game::GetInstance()->GetTextureManager()->GetTexture("Coin");
+	GG::Texture* grayTex = Game::GetInstance()->GetTextureManager()->GetTexture("CoinGray");
 
 	// create the coin animation
-	mRenderable = new GG::Renderable(tex, .75f, true);
+	mRenderable = new GG::Renderable(tex, grayTex, .75f, true);
 
 
 	mRect.w = mRenderable->GetWidth();
@@ -34,4 +35,9 @@ Coin::~Coin()
 void Coin::Update(float dt)
 {
 	mRenderable->Animate(dt);
+}
+
+void Coin::SetGrayscale(bool grayscale)
+{
+	mRenderable->SetGrayscale(grayscale);
 }

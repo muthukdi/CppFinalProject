@@ -4,8 +4,6 @@
 #include "Grid.h"
 
 
-Grid* CreateRandomLevel(const std::string& tileTexName);
-
 Grid* LoadLevel(const std::string& filename, bool items);
 
 #endif

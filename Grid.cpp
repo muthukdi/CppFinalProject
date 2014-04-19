@@ -19,6 +19,11 @@ void Tile::SetRenderable(GG::Renderable* renderable)
     mRenderable = renderable;   // set new one 
 }
 
+void Tile::SetGrayscale(bool grayscale)
+{
+	mRenderable->SetGrayscale(grayscale);
+}
+
 
 Grid::Grid()
     : mNumCols(0)

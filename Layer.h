@@ -12,11 +12,13 @@ class Layer {
     float                   mPosY;
 
 public:
-                            Layer(float x, float y, const std::string name);
+                            Layer(float x, float y, const std::string texName, const std::string grayTexName);
                             ~Layer();
 
-    GG::Renderable*         GetRenderable() const   { return mRenderable; }
+    GG::Renderable*         GetRenderable()		   { return mRenderable; }
     const GG::Rect&         GetRect() const         { return mRect; }
+
+	void					SetGrayscale(bool grayscale);
 };
 
 #endif

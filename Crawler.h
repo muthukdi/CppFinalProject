@@ -41,7 +41,7 @@ class Crawler {
 		Crawler(float x, float y, bool jumpedOn);
 		virtual ~Crawler();
 
-		const GG::Renderable*       GetRenderable() const   { return mRenderable; }
+		GG::Renderable*				GetRenderable()		   { return mRenderable; }
 		const GG::Rect&             GetRect() const         { return mRect; }
 		const GG::Rect&				GetCollisionRect() const		{ return mCollisionRect; }
 		const GG::Rect&				GetTileRect() const				{ return mTileRect; }
@@ -69,6 +69,7 @@ class Crawler {
 		const bool					IsJumpedOn() const			{ return mJumpedOn; }
 
 		virtual void                Update(float dt) = 0; //Virtual method used with the CrawlerWeak and strong
+		void						SetGrayscale(bool grayscale);
 	};
 
 #endif

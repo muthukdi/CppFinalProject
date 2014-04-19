@@ -16,13 +16,15 @@ public:
 	Coin(float x, float y);
 	~Coin();
 
-	GG::Renderable*         GetRenderable() const   { return mRenderable; }
-	const GG::Rect&         GetRect() const         { return mRect; }
+	GG::Renderable*         GetRenderable()							{ return mRenderable; }
+	const GG::Rect&         GetRect() const						    { return mRect; }
 
 	void                    Update(float dt);
 
-	void					SetSoundDelay(int delayTime){ mSoundDelay += delayTime; }
-	int						GetSoundDelay(){ return mSoundDelay; }
+	void					SetSoundDelay(int delayTime)			{ mSoundDelay += delayTime; }
+	int						GetSoundDelay()							{ return mSoundDelay; }
+	
+	void					SetGrayscale(bool grayscale);
 };
 
 #endif

@@ -13,8 +13,9 @@ Renderable class
 
     A Renderable is something that can be drawn, a.k.a. rendered.
 
-    In this case, a Renderable holds a pointer to a texture and the 
-    sub-rectangle in the texture where its image resides.
+    In this case, a Renderable holds a pointer to a texture, a pointer to 
+	a grayscale version of that texture, and the 
+    sub-rectangle in these textures where its image resides.
 
     The Renderable doesn't own the Texture, since multiple renderables can
     share the same Texture object at the same time.  You can think of a
@@ -33,6 +34,8 @@ Renderable class
 class Renderable {
 
     const Texture*          mTex;           // sprite sheet (we don't own this)
+	const Texture*			mGrayscaleTex;  // grayscale version
+	bool					mGrayscale;
 
     int                     mNumFrames;     // number of animation frames or 1 if not animatable
 
@@ -46,11 +49,11 @@ class Renderable {
 	Point                   mRotOrigin;     // rotation origin
 
 public:
-                            Renderable(const Texture* tex);
-                            Renderable(const Texture* tex, int cellNo);
-                            Renderable(const Texture* tex, float duration, bool loopable);
+                            Renderable(const Texture* tex, const Texture* grayscaleTex);
+                            Renderable(const Texture* tex, const Texture* grayscaleTex, int cellNo);
+                            Renderable(const Texture* tex, const Texture* grayscaleTex, float duration, bool loopable);
 
-    const Texture*          GetTexture() const      { return mTex; }
+    const Texture*          GetTexture() const      { return mGrayscale ? mGrayscaleTex : mTex; }
     const Rect*             GetRect() const         { return &mFrameRect; }
 
     int                     GetWidth() const        { return mFrameRect.w; }
@@ -73,6 +76,8 @@ public:
 
 	const Point&            GetRotationOrigin() const               { return mRotOrigin; }
     void                    SetRotationOrigin(const Point& origin)  { mRotOrigin = origin; }
+
+	void					SetGrayscale(bool grayscale)	{ mGrayscale = grayscale; }
 };
 
 } // end of namespace

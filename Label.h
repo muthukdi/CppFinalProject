@@ -15,7 +15,7 @@ public:
                             Label(float x, float y, const std::string name);
                             ~Label();
 
-    GG::Renderable*         GetRenderable() const   { return mRenderable; }
+    GG::Renderable*         GetRenderable()		   { return mRenderable; }
     const GG::Rect&         GetRect() const         { return mRect; }
 };
 
