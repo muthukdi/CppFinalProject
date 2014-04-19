@@ -61,10 +61,10 @@ class Game {
     GG::Timer               mTimer;
     float                   mTime;          // time elapsed since game started (in seconds)
 	float					mMeteorTime;	// time that the last meteor was created (in seconds)
+	float					mFlashTime;		// time that the last grayscale/color switch occured
+	float					mFlashesNeeded;  // number of flashes that are needed
 
     Grid*                   mGrid;
-
-    std::list<Explosion*>   mExplosions;
 
 	Robot*					mRobot;
 	Layer*					mBackground;
@@ -72,9 +72,13 @@ class Game {
 	Layer*					mFlagPole;
 	Label*					mPointsLabel;
 	Label*					mLivesLabel;
+
+	std::list<Explosion*>   mExplosions;
 	std::list<Meteor*>		mMeteors;
 	std::list<Crawler*>     mCrawlers;
 	std::list<Coin*>		mCoins;
+	std::list<Layer*>		mMushrooms;
+
 	int						mScene;
 
 	bool					rectVisible;
@@ -86,6 +90,7 @@ class Game {
 	Mix_Chunk*				mDieSound;
 	Mix_Chunk*				mBlockSound;
 	Mix_Chunk*				mThudSound;
+	Mix_Chunk*				mOneupSound;
 	Mix_Music*				mMusic;
 	Mix_Music*				mGoodGameOverMusic;
 	Mix_Music*				mBadGameOverMusic;
@@ -116,12 +121,14 @@ public:
 
 	std::list<Crawler*>*	GetCrawlers()					{ return &mCrawlers; }
 	std::list<Coin*>*		GetCoins()						{ return &mCoins; }
+	std::list<Layer*>*		GetMushrooms()					{ return &mMushrooms; }
 	void					SetScene(int scene)				{ mScene = scene; }
 	void					LoadScene(int scene, bool items);
 	void					LoadTextures();
 	void					LoadGrayscaleTextures();
 	void					LoadSounds();
 	void					SetEntitiesGrayscale(bool grayscale);
+	void					SetFlashesNeeded(int flashes)	{ mFlashesNeeded = (float)flashes*2.0f; }
 
 private:
                             Game();

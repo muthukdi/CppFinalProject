@@ -48,6 +48,8 @@ Game::Game()
 	, mPointsLabel(NULL)
 	, mLivesLabel(NULL)
 	, mPoints(0)
+	, mFlashTime(0.0f)
+	, mFlashesNeeded(0.0f)
 {
 }
 
@@ -263,7 +265,7 @@ bool Game::Initialize()
 	mRobot = new Robot(35.0f, mScrHeight-160.0f);
 
 	// initialize the foreground
-	mForeground = new Layer(mScrWidth * .5f, mScrHeight * .5f, "Foreground", "Foreground2");
+	mForeground = new Layer(0.0f, 0.0f, 800.0f, 480.0f, "Foreground", "Foreground2");
 
     return true;
 }
@@ -344,6 +346,14 @@ void Game::Shutdown()
         delete coin;
     }
     mCoins.clear();
+
+	// delete all mushrooms
+	std::list<Layer*>::iterator mushIter = mMushrooms.begin();
+    for ( ; mushIter != mMushrooms.end(); ++mushIter)
+	{
+        delete *mushIter;
+    }
+	mMeteors.clear();
 
     // delete the texture manager (and all the textures it loaded for us)
     delete mTexMgr;
@@ -724,6 +734,51 @@ void Game::Update(float dt)
     }
 
 	//
+    // update the mushrooms
+    //
+    std::list<Layer*>::iterator mushIt = mMushrooms.begin();
+    while (mushIt != mMushrooms.end())
+	{
+        Layer* entity = *mushIt;
+		// If the robot collects the mushroom, it gets an extra life!
+		if (entity->GetRect().y + entity->GetRect().h > mRobot->GetCollisonRect().y &&
+			entity->GetRect().y < mRobot->GetCollisonRect().y + mRobot->GetCollisonRect().h &&
+			entity->GetRect().x + entity->GetRect().w > mRobot->GetCollisonRect().x &&
+			entity->GetRect().x < mRobot->GetCollisonRect().x + mRobot->GetCollisonRect().w && !mRobot->IsDead())
+		{
+			mRobot->SetLives(mRobot->GetLives() + 1);
+			SetFlashesNeeded(2);
+			Mix_PlayChannel(-1, mOneupSound, 0);
+			mushIt = mMushrooms.erase(mushIt); // remove the entry from the list and advance iterator
+			delete entity;              // delete the object
+		}
+		else
+		{
+            ++mushIt;                   // advance list iterator
+        }
+    }
+
+	//
+    // generates a grayscale flash every 50 ms (if needed)
+    //
+	if (mFlashesNeeded > 0.0f)
+	{
+		if (mTime - mFlashTime > 0.1)
+		{
+			if ((int)mFlashesNeeded % 2)
+			{
+				SetEntitiesGrayscale(false);
+			}
+			else
+			{
+				SetEntitiesGrayscale(true);
+			}
+			mFlashesNeeded--;
+			mFlashTime = mTime;
+		}
+	}
+
+	//
     // create a new meteor every 0.2 to 1.2 seconds in scene 5
     //
 	if (mTime - mMeteorTime > GG::UnitRandom() + 0.2 && mScene == 5)
@@ -858,6 +913,16 @@ void Game::Draw()
 	{
         Coin* coin = *coinIt;
         Render(coin->GetRenderable(), &coin->GetRect(), SDL_FLIP_NONE);
+    }
+
+	//
+    // draw the mushrooms
+    //
+	std::list<Layer*>::iterator mushIter = mMushrooms.begin();
+    for ( ; mushIter != mMushrooms.end(); ++mushIter)
+	{
+        Layer* mushroom = *mushIter;
+        Render(mushroom->GetRenderable(), &mushroom->GetRect(), SDL_FLIP_NONE);
     }
 
 	//
@@ -998,6 +1063,14 @@ void Game::LoadScene(int scene, bool items)
     }
     mMeteors.clear();
 
+	// delete all mushrooms
+	std::list<Layer*>::iterator mushIter = mMushrooms.begin();
+    for ( ; mushIter != mMushrooms.end(); ++mushIter)
+	{
+        delete *mushIter;
+    }
+	mMushrooms.clear();
+
 	delete mBackground;
 	mBackground = NULL;
 
@@ -1008,7 +1081,7 @@ void Game::LoadScene(int scene, bool items)
 	t << "media/" << mScene << ".txt";
 	b << "Background" << mScene + 1;
 	gb << "BackgroundGray" << mScene + 1;
-	mBackground = new Layer(mScrWidth *.5f, mScrHeight *.5f, b.str(), gb.str());
+	mBackground = new Layer(0.0f, 0.0f, 800.0f, 480.0f, b.str(), gb.str());
 	mGrid = LoadLevel(t.str(), items);
 
 	// First scene
@@ -1021,7 +1094,7 @@ void Game::LoadScene(int scene, bool items)
 	// Game over scene
 	if (mScene == 6)
 	{
-		mFlagPole = new Layer(mScrWidth *.8f, mScrHeight *.5f + 20, "FlagPole", "FlagPoleGray");
+		mFlagPole = new Layer(mScrWidth *.7f, 68.0f, 124.0f, 380.0f, "FlagPole", "FlagPoleGray");
 		Mix_VolumeMusic(128);
 		Mix_PlayMusic(mGoodGameOverMusic, 0);
 	}
@@ -1055,6 +1128,7 @@ void Game::LoadTextures()
 	mTexMgr->LoadTexture("CrawlerDie", "crawler_die.png", false, 8);
 	mTexMgr->LoadTexture("Coin", "coin.png", false, 10);
 	mTexMgr->LoadTexture("FlagPole", "flagpole.png", false);
+	mTexMgr->LoadTexture("Mushroom", "mushroom.png", false);
 }
 
 // Load textures with grayscale (done programmatically!)
@@ -1083,6 +1157,7 @@ void Game::LoadGrayscaleTextures()
 	mTexMgr->LoadTexture("CrawlerDieGray", "crawler_die.png", true, 8);
 	mTexMgr->LoadTexture("CoinGray", "coin.png", true, 10);
 	mTexMgr->LoadTexture("FlagPoleGray", "flagpole.png", true);
+	mTexMgr->LoadTexture("MushroomGray", "mushroom.png", true);
 }
 
 void Game::LoadSounds()
@@ -1094,6 +1169,7 @@ void Game::LoadSounds()
 	mDieSound = Mix_LoadWAV("media/die_sound.wav");
 	mBlockSound = Mix_LoadWAV("media/block_sound.wav");
 	mThudSound = Mix_LoadWAV("media/thud_sound.wav");
+	mOneupSound = Mix_LoadWAV("media/oneup_sound.wav");
 }
 
 // Tells the entities to use their grayscale renderables
@@ -1152,5 +1228,12 @@ void Game::SetEntitiesGrayscale(bool grayscale)
 	{
         Coin* coin = *coinIter;
         coin->SetGrayscale(grayscale);
+    }
+
+	std::list<Layer*>::iterator mushIter = mMushrooms.begin();
+    for ( ; mushIter != mMushrooms.end(); ++mushIter)
+	{
+        Layer* mushroom = *mushIter;
+        mushroom->SetGrayscale(grayscale);
     }
 }

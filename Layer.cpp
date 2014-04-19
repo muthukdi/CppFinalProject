@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-Layer::Layer(float x, float y, const std::string texName, const std::string grayTexName)
+Layer::Layer(float x, float y, float w, float h, const std::string texName, const std::string grayTexName)
     : mRenderable(NULL)
 {
     GG::Texture* tex = Game::GetInstance()->GetTextureManager()->GetTexture(texName);
@@ -12,10 +12,10 @@ Layer::Layer(float x, float y, const std::string texName, const std::string gray
     mRenderable = new GG::Renderable(tex, grayTex);
 
     // center the layer at the specified coordinate
-    mRect.x = (int)x - mRenderable->GetWidth() / 2;
-    mRect.y = (int)y - mRenderable->GetHeight() / 2;
-    mRect.w = mRenderable->GetWidth();
-    mRect.h = mRenderable->GetHeight();
+    mRect.x = (int)x;
+    mRect.y = (int)y;
+    mRect.w = (int)w;
+    mRect.h = (int)h;
 }
 
 Layer::~Layer()

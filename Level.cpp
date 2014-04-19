@@ -102,6 +102,12 @@ Grid* LoadLevel(const std::string& filename, bool items)
 				tile->SetRenderable(new GG::Renderable(tex2, grayTex2, r));
 				break;
 			}
+			case 'm':
+			{
+				Layer* mushroom = new Layer(col*tileWidth, row*tileHeight-8.0f, 40.0f, 40.0f, "Mushroom", "MushroomGray");
+				game->GetMushrooms()->push_back(mushroom);
+				break;
+			}
 			case '#':
 			{
 				int r = GG::RandomInt(numCells);
