@@ -5,8 +5,6 @@
 
 Layer::Layer(float x, float y, const std::string texName, const std::string grayTexName)
     : mRenderable(NULL)
-    , mPosX(x)
-    , mPosY(y)
 {
     GG::Texture* tex = Game::GetInstance()->GetTextureManager()->GetTexture(texName);
 	GG::Texture* grayTex = Game::GetInstance()->GetTextureManager()->GetTexture(grayTexName);

@@ -8,9 +8,6 @@ class Layer {
     GG::Renderable*         mRenderable;
     GG::Rect                mRect;
 
-    float                   mPosX;
-    float                   mPosY;
-
 public:
                             Layer(float x, float y, const std::string texName, const std::string grayTexName);
                             ~Layer();
