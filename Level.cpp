@@ -74,7 +74,7 @@ Grid* LoadLevel(const std::string& filename, bool items)
 			{
 				if (items)
 				{
-					Crawler* crawler = new CrawlerWeak(col*tileWidth, (row+1)*tileHeight, true);
+					Crawler* crawler = new CrawlerWeak((float)col*tileWidth, (float)(row+1)*tileHeight, true);
 					crawler->SetDirection(GG::RandomSign());
 					game->GetCrawlers()->push_back(crawler);
 				}
@@ -84,7 +84,7 @@ Grid* LoadLevel(const std::string& filename, bool items)
 			{
 				if (items)
 				{
-					Crawler* crawler = new CrawlerStrong(col*tileWidth, (row+1)*tileHeight, false);
+					Crawler* crawler = new CrawlerStrong((float)col*tileWidth, (float)(row+1)*tileHeight, false);
 					crawler->SetDirection(GG::RandomSign());
 					game->GetCrawlers()->push_back(crawler);
 				}
@@ -92,7 +92,7 @@ Grid* LoadLevel(const std::string& filename, bool items)
 			}
 			case 'c':
 			{
-				Coin* coin = new Coin(col*tileWidth, (row+1)*tileHeight);
+				Coin* coin = new Coin((float)col*tileWidth,(float) (row+1)*tileHeight);
 				game->GetCoins()->push_back(coin);
 				break;
 			}
@@ -104,7 +104,7 @@ Grid* LoadLevel(const std::string& filename, bool items)
 			}
 			case 'm':
 			{
-				Layer* mushroom = new Layer(col*tileWidth, row*tileHeight-8.0f, 40.0f, 40.0f, "Mushroom", "MushroomGray");
+				Layer* mushroom = new Layer((float)col*tileWidth, (float)row*tileHeight-8.0f, 40.0f, 40.0f, "Mushroom", "MushroomGray");
 				game->GetMushrooms()->push_back(mushroom);
 				break;
 			}

@@ -786,7 +786,7 @@ void Game::Update(float dt)
 		int randomX = GG::RandomInt(mScrWidth-64);
 		int randomRotation = GG::RandomInt(90) + 180;
 		randomRotation = (randomRotation % 2) ? randomRotation : -randomRotation;
-		Meteor* meteor = new Meteor(randomX, -64.0, (double)randomRotation);  
+		Meteor* meteor = new Meteor(randomX, -64, (double)randomRotation);  
 		mMeteors.push_back(meteor);
 		// timestamp this meteor!
 		mMeteorTime = mTime;

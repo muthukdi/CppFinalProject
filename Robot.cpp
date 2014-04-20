@@ -311,7 +311,7 @@ void Robot::Update(float dt)
 			// scene without any crawlers or coins
 			else
 			{
-				mRect.x = game->GetScrWidth() + 10.0 - mRect.w;
+				mRect.x = game->GetScrWidth() + 10 - mRect.w;
 				game->SetScene(game->GetScene() - 1);
 				game->LoadScene(game->GetScene(), false);
 			}
